@@ -32,12 +32,16 @@ def obter_ligacoes():
                 "page": page
             }
 
-            resp = requests.get(URL, headers=HEADERS, params=params, timeout=30)
+            resp = requests.get(URL, headers=HEADERS, params=params, timeout=15)
+
             if resp.status_code != 200:
-                return jsonify({"erro": f"Erro {resp.status_code} da API"}), 500
+                print(f"❌ Erro da API 3C Plus (status {resp.status_code}): {resp.text}")
+                break  # Para o loop e envia o que já tiver
 
             page_data = resp.json().get("data", [])
+
             if not page_data:
+                print("ℹ️ Nenhum dado retornado da API 3C Plus.")
                 break
 
             dados.extend(page_data)
@@ -46,8 +50,8 @@ def obter_ligacoes():
         return jsonify(dados)
 
     except requests.exceptions.RequestException as e:
-        print("❌ Erro na requisição:", e)
-        return jsonify({"erro": "Erro na conexão com a API 3C Plus."}), 500
+        print("❌ Erro de conexão com a API 3C Plus:", e)
+        return jsonify([])  # Resposta vazia para não derrubar o site
 
 @app.route("/api/resumo")
 def resumo_ligacoes():
