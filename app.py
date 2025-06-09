@@ -9,13 +9,11 @@ TOKEN = "WxKTCV3PvjUAHLYy9sgmZ1bLsXM2qAnbL7jQYp6Qc8kmUgO9GJH0Zn7kUlDd"
 HEADERS = {"Authorization": f"Bearer {TOKEN}"}
 URL = "https://barsixp.3c.plus/api/v1/calls"
 
-# 🔁 Função auxiliar com limite de segurança
 def buscar_ligacoes_da_api():
     dados = []
     page = 1
-    max_paginas = 50  # segurança contra loop infinito
-
-    data_hoje = datetime.now()
+    max_paginas = 50
+    data_hoje = datetime.utcnow()
     data_inicio = data_hoje - timedelta(days=7)
 
     try:
@@ -43,6 +41,9 @@ def buscar_ligacoes_da_api():
             if not page_data:
                 break
 
+            for item in page_data:
+                print("🔍 Item recebido:", item, flush=True)
+
             dados.extend(page_data)
             page += 1
 
@@ -69,7 +70,7 @@ def resumo_ligacoes():
     print("📊 [Railway] Rota /api/resumo foi acessada!", flush=True)
     dados = buscar_ligacoes_da_api()
 
-    hoje = datetime.now().date()
+    hoje = datetime.utcnow().date()
     inicio_semana = hoje - timedelta(days=7)
 
     contagem_total = 0
@@ -82,10 +83,20 @@ def resumo_ligacoes():
     agentes_qual_semana = {}
 
     for lig in dados:
-        if "call_date" not in lig:
+        call_date_str = lig.get("call_date", "")
+        try:
+            data_lig = datetime.strptime(call_date_str[:10], "%Y-%m-%d").date()
+        except Exception as e:
+            print(f"⚠️ Erro ao converter data: '{call_date_str}' - {e}", flush=True)
             continue
-        data_lig = datetime.strptime(lig["call_date"][:10], "%Y-%m-%d").date()
-        agente = lig.get("agent") or lig.get("agente_nome") or "Desconhecido"
+
+        # Nome do agente robusto
+        agente_info = lig.get("agent")
+        if isinstance(agente_info, dict):
+            agente = agente_info.get("name", "Desconhecido")
+        else:
+            agente = lig.get("agente_nome") or str(agente_info) or "Desconhecido"
+
         qualificacao = lig.get("qualification", "")
 
         contagem_total += 1
