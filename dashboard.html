@@ -173,6 +173,7 @@
         const resp = await fetch("/api/resumo");
         const resumo = await resp.json();
 
+        // 🕓 Atualiza tudo de uma vez após carregar
         document.getElementById("statusHoje").textContent = resumo.contagem_hoje ?? '0';
         document.getElementById("statusSemana").textContent = resumo.contagem_semana ?? '0';
         document.getElementById("statusAgenteTop").textContent = `${resumo.agente_top_hoje ?? '-'} (${resumo.ligacoes_top_hoje ?? 0})`;
@@ -218,14 +219,19 @@
       if (id === 'graficoFala') chartFala = novoGrafico;
     }
 
-    function atualizarTudo() {
-      carregarResumo();
-      carregarDados();
+    async function atualizarTudo() {
+      await Promise.all([
+        carregarResumo(),
+        carregarDados()
+      ]);
     }
 
     document.addEventListener("DOMContentLoaded", function () {
       atualizarTudo();
-      setInterval(atualizarTudo, 30000);
+      setInterval(() => {
+        console.log("⏳ Atualizando dados...");
+        atualizarTudo();
+      }, 30000);
     });
   </script>
 </body>
