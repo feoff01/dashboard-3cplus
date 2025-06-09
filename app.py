@@ -58,7 +58,7 @@ def resumo_ligacoes():
     dados = response.get_json()
     hoje = datetime.now().date()
     inicio_semana = hoje - timedelta(days=7)
-
+    
     contagem_total = 0
     contagem_hoje = 0
     contagem_semana = 0
@@ -115,9 +115,9 @@ def resumo_ligacoes():
 
     return jsonify(resumo)
 
-import os
+# import os
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+# if __name__ == "__main__":
+#     port = int(os.environ.get("PORT", 5000))
+#     app.run(host="0.0.0.0", port=port)
 
