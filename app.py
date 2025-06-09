@@ -16,6 +16,7 @@ def index():
 
 @app.route("/api/ligacoes")
 def obter_ligacoes():
+    print("🚀 [Railway] Rota /api/ligacoes foi acessada!")
     dados = []
     page = 1
 
@@ -126,7 +127,10 @@ def resumo_ligacoes():
 
     return jsonify(resumo)
 
-
+@app.route("/api/debug")
+def debug_api():
+    print("✅ Rota /api/debug acessada com sucesso.")
+    return jsonify({"mensagem": "API está ativa!"})
 import os
 
 if __name__ == "__main__":
