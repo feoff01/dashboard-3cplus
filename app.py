@@ -16,7 +16,7 @@ def index():
 
 @app.route("/api/ligacoes")
 def obter_ligacoes():
-    print("🚀 [Railway] Rota /api/ligacoes foi acessada!")
+    print("🚀 [Railway] Rota /api/ligacoes foi acessada!",flush=True)
     dados = []
     page = 1
 
@@ -50,7 +50,7 @@ def obter_ligacoes():
         # 🔽 ADICIONANDO OS LOGS AQUI:
         print(f"🔍 Total de registros recebidos da API: {len(dados)}")
         if dados:
-            print(f"📦 Exemplo de dado recebido: {dados[0]}")
+            print(f"📦 Exemplo de dado recebido: {dados[0]}",flush=True)
         else:
             print("⚠️ Nenhum dado foi retornado pela API 3C Plus.")
 
@@ -135,5 +135,5 @@ import os
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
-    
+    app.run(host="0.0.0.0", port=port, debug=True)
+
