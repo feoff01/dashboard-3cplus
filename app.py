@@ -42,13 +42,7 @@ def obter_ligacoes():
 
             dados.extend(page_data)
             page += 1
-         # 🔽 ADICIONANDO OS LOGS AQUI:
-        print(f"🔍 Total de registros recebidos da API: {len(dados)}")
-        if dados:
-            print(f"📦 Exemplo de dado recebido: {dados[0]}")
-        else:
-            print("⚠️ Nenhum dado foi retornado pela API 3C Plus.")
-
+        
 
         return jsonify(dados)
         
