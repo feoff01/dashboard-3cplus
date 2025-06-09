@@ -42,8 +42,16 @@ def obter_ligacoes():
 
             dados.extend(page_data)
             page += 1
+         # 🔽 ADICIONANDO OS LOGS AQUI:
+        print(f"🔍 Total de registros recebidos da API: {len(dados)}")
+        if dados:
+            print(f"📦 Exemplo de dado recebido: {dados[0]}")
+        else:
+            print("⚠️ Nenhum dado foi retornado pela API 3C Plus.")
+
 
         return jsonify(dados)
+        
 
     except requests.exceptions.RequestException as e:
         print("❌ Erro na requisição:", e)
@@ -121,3 +129,4 @@ import os
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+    
