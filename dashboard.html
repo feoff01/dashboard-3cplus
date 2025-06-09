@@ -223,8 +223,10 @@
       carregarDados();
     }
 
-    atualizarTudo();
-    setInterval(atualizarTudo, 30000);
+    document.addEventListener("DOMContentLoaded", function () {
+      atualizarTudo();
+      setInterval(atualizarTudo, 30000);
+    });
   </script>
 </body>
 </html>
