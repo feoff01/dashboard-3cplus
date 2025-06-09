@@ -62,7 +62,6 @@
   <h1>Dashboard de Ligações - 3C Plus</h1>
   <button onclick="atualizarTudo()">🔄 Atualizar Agora</button>
 
-  <!-- Cartões em 2 linhas de 4 colunas -->
   <div class="grid-cartoes">
     <div class="cartao cor-cinza">
       <strong>📅 Ligações hoje</strong>
@@ -99,7 +98,6 @@
     </div>
   </div>
 
-  <!-- Gráficos lado a lado -->
   <div style="display: flex; gap: 20px;">
     <div class="grafico-container">
       <h2>Top 5 Agentes por Volume de Ligações</h2>
@@ -125,7 +123,7 @@
         const contagemMap = {};
 
         data.forEach(row => {
-          const agente = row.agent?.name || row.agente_nome || row.agent;
+          const agente = row.agent?.name || row.agente_nome || row.agent || "Desconhecido";
           const tempo = row.speaking_time;
           if (!agente || agente === "-" || agente === "Desconhecido") return;
 
@@ -177,13 +175,13 @@
 
         document.getElementById("statusHoje").textContent = resumo.contagem_hoje ?? '0';
         document.getElementById("statusSemana").textContent = resumo.contagem_semana ?? '0';
-        document.getElementById("statusAgenteTop").textContent = `${resumo.agente_top_hoje} (${resumo.ligacoes_top_hoje})`;
+        document.getElementById("statusAgenteTop").textContent = `${resumo.agente_top_hoje ?? '-'} (${resumo.ligacoes_top_hoje ?? 0})`;
         document.getElementById("statusTotal").textContent = resumo.contagem_total ?? '0';
 
         document.getElementById("vendasSemana").textContent = resumo.qualificacao_semana ?? '0';
         document.getElementById("vendasTotal").textContent = resumo.qualificacao_total ?? '0';
-        document.getElementById("agenteVendasSemana").textContent = `${resumo.agente_venda_semana} (${resumo.vendas_semana_agente})`;
-        document.getElementById("agenteVendasTotal").textContent = `${resumo.agente_venda_total} (${resumo.vendas_total_agente})`;
+        document.getElementById("agenteVendasSemana").textContent = `${resumo.agente_venda_semana ?? '-'} (${resumo.vendas_semana_agente ?? 0})`;
+        document.getElementById("agenteVendasTotal").textContent = `${resumo.agente_venda_total ?? '-'} (${resumo.vendas_total_agente ?? 0})`;
 
       } catch (e) {
         console.error("❌ Erro ao carregar resumo:", e);
