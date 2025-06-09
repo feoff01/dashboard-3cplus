@@ -13,8 +13,10 @@ def buscar_ligacoes_da_api():
     dados = []
     page = 1
     max_paginas = 50
-    data_hoje = datetime.utcnow()
-    data_inicio = data_hoje - timedelta(days=7)
+
+    # ✅ Pegando dados do ano todo para testes
+    data_inicio = datetime.strptime("2025-01-01", "%Y-%m-%d")
+    data_hoje = datetime.strptime("2025-12-31", "%Y-%m-%d")
 
     try:
         print("[Railway] Iniciando chamada para a API da 3C Plus...", flush=True)
@@ -38,11 +40,11 @@ def buscar_ligacoes_da_api():
             page_data = resp.json().get("data", [])
             print(f"📦 Página {page}: {len(page_data)} registros", flush=True)
 
-            if not page_data:
-                break
-
             for item in page_data:
                 print("🔍 Item recebido:", item, flush=True)
+
+            if not page_data:
+                break
 
             dados.extend(page_data)
             page += 1
@@ -70,8 +72,8 @@ def resumo_ligacoes():
     print("📊 [Railway] Rota /api/resumo foi acessada!", flush=True)
     dados = buscar_ligacoes_da_api()
 
-    hoje = datetime.utcnow().date()
-    inicio_semana = hoje - timedelta(days=7)
+    hoje = datetime.strptime("2025-12-31", "%Y-%m-%d").date()
+    inicio_semana = datetime.strptime("2025-12-24", "%Y-%m-%d").date()
 
     contagem_total = 0
     contagem_hoje = 0
@@ -90,12 +92,15 @@ def resumo_ligacoes():
             print(f"⚠️ Erro ao converter data: '{call_date_str}' - {e}", flush=True)
             continue
 
-        # Nome do agente robusto
         agente_info = lig.get("agent")
+        agente = "Desconhecido"
+
         if isinstance(agente_info, dict):
             agente = agente_info.get("name", "Desconhecido")
-        else:
-            agente = lig.get("agente_nome") or str(agente_info) or "Desconhecido"
+        elif isinstance(agente_info, str) and agente_info.strip():
+            agente = agente_info.strip()
+        elif lig.get("agente_nome"):
+            agente = lig.get("agente_nome")
 
         qualificacao = lig.get("qualification", "")
 
