@@ -24,6 +24,8 @@ def obter_ligacoes():
     data_inicio = data_hoje - timedelta(days=7)
 
     try:
+        print("[Railway] Iniciando chamada para a API da 3C Plus...", flush=True)
+
         while True:
             params = {
                 "filters[created_at][from]": data_inicio.strftime("%Y-%m-%dT00:00:00Z"),
@@ -35,26 +37,25 @@ def obter_ligacoes():
 
             resp = requests.get(URL, headers=HEADERS, params=params, timeout=30)
 
+            print(f"🛰️ Status da resposta da API: {resp.status_code}", flush=True)
+
             if resp.status_code != 200:
-                print(f"❌ Erro ao acessar API: {resp.status_code}")
-                print(f"Resposta da API: {resp.text}")
+                print(f"❌ Conteúdo da resposta com erro: {resp.text}", flush=True)
                 return jsonify({"erro": f"Erro {resp.status_code} da API"}), 500
 
             page_data = resp.json().get("data", [])
+            print(f"📦 Página {page}: {len(page_data)} registros", flush=True)
+
             if not page_data:
                 break
 
             dados.extend(page_data)
             page += 1
 
-        # 🔽 ADICIONANDO OS LOGS AQUI:
-        print(f"🔍 Total de registros recebidos da API: {len(dados)}")
-        if dados:
-            print(f"📦 Exemplo de dado recebido: {dados[0]}",flush=True)
-        else:
-            print("⚠️ Nenhum dado foi retornado pela API 3C Plus.")
+        print(f"✅ Total de registros acumulados: {len(dados)}", flush=True)
 
         return jsonify(dados)
+
 
     except requests.exceptions.RequestException as e:
         print("❌ Erro na requisição:", e)
