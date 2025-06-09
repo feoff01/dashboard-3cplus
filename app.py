@@ -9,17 +9,19 @@ TOKEN = "WxKTCV3PvjUAHLYy9sgmZ1bLsXM2qAnbL7jQYp6Qc8kmUgO9GJH0Zn7kUlDd"
 HEADERS = {"Authorization": f"Bearer {TOKEN}"}
 URL = "https://barsixp.3c.plus/api/v1/calls"
 
-# ✅ Função auxiliar
+# 🔁 Função auxiliar com limite de segurança
 def buscar_ligacoes_da_api():
     dados = []
     page = 1
+    max_paginas = 50  # segurança contra loop infinito
+
     data_hoje = datetime.now()
     data_inicio = data_hoje - timedelta(days=7)
 
     try:
         print("[Railway] Iniciando chamada para a API da 3C Plus...", flush=True)
 
-        while True:
+        while page <= max_paginas:
             params = {
                 "filters[created_at][from]": data_inicio.strftime("%Y-%m-%dT00:00:00Z"),
                 "filters[created_at][to]": data_hoje.strftime("%Y-%m-%dT23:59:59Z"),
@@ -29,10 +31,10 @@ def buscar_ligacoes_da_api():
             }
 
             resp = requests.get(URL, headers=HEADERS, params=params, timeout=30)
-            print(f"🛰️ Status da resposta da API: {resp.status_code}", flush=True)
+            print(f"🛰️ Página {page} | Status: {resp.status_code}", flush=True)
 
             if resp.status_code != 200:
-                print(f"❌ Conteúdo da resposta com erro: {resp.text}", flush=True)
+                print(f"❌ Erro: {resp.text}", flush=True)
                 return []
 
             page_data = resp.json().get("data", [])
@@ -44,27 +46,24 @@ def buscar_ligacoes_da_api():
             dados.extend(page_data)
             page += 1
 
-        print(f"✅ Total de registros acumulados: {len(dados)}", flush=True)
+        print(f"✅ Total de registros: {len(dados)}", flush=True)
         return dados
 
     except requests.exceptions.RequestException as e:
-        print("❌ Erro na requisição:", e, flush=True)
+        print(f"❌ Erro de conexão com API: {e}", flush=True)
         return []
 
-# ✅ Rota inicial
 @app.route("/")
 def index():
     caminho = os.path.join(os.path.dirname(__file__), "dashboard.html")
     return send_file(caminho)
 
-# ✅ /api/ligacoes usando a função auxiliar
 @app.route("/api/ligacoes")
 def obter_ligacoes():
     print("🚀 [Railway] Rota /api/ligacoes foi acessada!", flush=True)
     dados = buscar_ligacoes_da_api()
     return jsonify(dados)
 
-# ✅ /api/resumo corrigido
 @app.route("/api/resumo")
 def resumo_ligacoes():
     print("📊 [Railway] Rota /api/resumo foi acessada!", flush=True)
@@ -127,15 +126,14 @@ def resumo_ligacoes():
         "vendas_semana_agente": vendas_semana_agente
     }
 
+    print(f"📤 Enviando resumo: {resumo}", flush=True)
     return jsonify(resumo)
 
-# ✅ Rota de teste
 @app.route("/api/debug")
 def debug_api():
     print("✅ Rota /api/debug acessada com sucesso.", flush=True)
     return jsonify({"mensagem": "API está ativa!"})
 
-# ✅ Rodar o app
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
