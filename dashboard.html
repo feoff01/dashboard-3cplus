@@ -112,10 +112,11 @@
   <script>
     let chartAgentes = null;
     let chartFala = null;
+    const BASE_URL = window.location.origin;
 
     async function carregarDados() {
       try {
-        const response = await fetch("/api/ligacoes");
+        const response = await fetch(`${BASE_URL}/api/ligacoes`);
         const data = await response.json();
 
         const agentesMap = {};
@@ -170,10 +171,9 @@
 
     async function carregarResumo() {
       try {
-        const resp = await fetch("/api/resumo");
+        const resp = await fetch(`${BASE_URL}/api/resumo`);
         const resumo = await resp.json();
 
-        // 🕓 Atualiza tudo de uma vez após carregar
         document.getElementById("statusHoje").textContent = resumo.contagem_hoje ?? '0';
         document.getElementById("statusSemana").textContent = resumo.contagem_semana ?? '0';
         document.getElementById("statusAgenteTop").textContent = `${resumo.agente_top_hoje ?? '-'} (${resumo.ligacoes_top_hoje ?? 0})`;
