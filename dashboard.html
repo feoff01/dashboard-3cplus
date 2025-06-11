@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <!-- Última atualização: forçando deploy-->
-
   <meta charset="UTF-8">
   <title>Dashboard 3C Plus</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -114,11 +112,10 @@
   <script>
     let chartAgentes = null;
     let chartFala = null;
-    const BASE_URL = window.location.origin;
 
     async function carregarDados() {
       try {
-        const response = await fetch(`${BASE_URL}/api/ligacoes`);
+        const response = await fetch("/api/ligacoes");
         const data = await response.json();
 
         const agentesMap = {};
@@ -173,18 +170,15 @@
 
     async function carregarResumo() {
       try {
-        const resp = await fetch(`${BASE_URL}/api/resumo`);
+        const resp = await fetch("/api/resumo");
         const resumo = await resp.json();
 
         document.getElementById("statusHoje").textContent = resumo.contagem_hoje ?? '0';
         document.getElementById("statusSemana").textContent = resumo.contagem_semana ?? '0';
-        document.getElementById("statusAgenteTop").textContent = `${resumo.agente_top_hoje ?? '-'} (${resumo.ligacoes_top_hoje ?? 0})`;
         document.getElementById("statusTotal").textContent = resumo.contagem_total ?? '0';
 
         document.getElementById("vendasSemana").textContent = resumo.qualificacao_semana ?? '0';
         document.getElementById("vendasTotal").textContent = resumo.qualificacao_total ?? '0';
-        document.getElementById("agenteVendasSemana").textContent = `${resumo.agente_venda_semana ?? '-'} (${resumo.vendas_semana_agente ?? 0})`;
-        document.getElementById("agenteVendasTotal").textContent = `${resumo.agente_venda_total ?? '-'} (${resumo.vendas_total_agente ?? 0})`;
 
       } catch (e) {
         console.error("❌ Erro ao carregar resumo:", e);
@@ -221,19 +215,14 @@
       if (id === 'graficoFala') chartFala = novoGrafico;
     }
 
-    async function atualizarTudo() {
-      await Promise.all([
-        carregarResumo(),
-        carregarDados()
-      ]);
+    function atualizarTudo() {
+      carregarResumo();
+      carregarDados();
     }
 
     document.addEventListener("DOMContentLoaded", function () {
       atualizarTudo();
-      setInterval(() => {
-        console.log("⏳ Atualizando dados...");
-        atualizarTudo();
-      }, 30000);
+      setInterval(atualizarTudo, 30000);
     });
   </script>
 </body>
