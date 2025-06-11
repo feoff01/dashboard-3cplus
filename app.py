@@ -5,12 +5,10 @@ from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
-# Token e URL da API da 3C Plus
 TOKEN = "WxKTCV3PvjUAHLYy9sgmZ1bLsXM2qAnbL7jQYp6Qc8kmUgO9GJH0Zn7kUlDd"
 HEADERS = {"Authorization": f"Bearer {TOKEN}"}
 URL = "https://barsixp.3c.plus/api/v1/calls"
 
-# Variável de cache
 dados_cache = []
 
 @app.route("/")
@@ -56,6 +54,9 @@ def pegar_dados():
 @app.route("/api/resumo")
 def resumo_ligacoes():
     global dados_cache
+    if not dados_cache:
+        return jsonify({"erro": "Nenhum dado carregado ainda."}), 400
+
     dados = dados_cache
     hoje = datetime.now().date()
     inicio_semana = hoje - timedelta(days=7)
@@ -119,6 +120,9 @@ def resumo_ligacoes():
 @app.route("/api/graficos")
 def graficos():
     global dados_cache
+    if not dados_cache:
+        return jsonify({"top_ligacoes": [], "top_fala": []})
+
     dados = dados_cache
     agentes = {}
     tempos = {}

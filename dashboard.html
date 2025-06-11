@@ -74,6 +74,8 @@
     async function carregarResumo() {
       try {
         const resp = await fetch("/api/resumo");
+        if (!resp.ok) throw new Error("Resumo indisponível");
+
         const resumo = await resp.json();
 
         document.getElementById("statusHoje").textContent         = resumo.contagem_hoje ?? '-';
