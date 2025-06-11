@@ -9,6 +9,7 @@ TOKEN = "WxKTCV3PvjUAHLYy9sgmZ1bLsXM2qAnbL7jQYp6Qc8kmUgO9GJH0Zn7kUlDd"
 HEADERS = {"Authorization": f"Bearer {TOKEN}"}
 URL = "https://barsixp.3c.plus/api/v1/calls"
 
+# Armazena os dados da API em memória
 dados_cache = []
 
 @app.route("/")
@@ -54,9 +55,6 @@ def pegar_dados():
 @app.route("/api/resumo")
 def resumo_ligacoes():
     global dados_cache
-    if not dados_cache:
-        return jsonify({"erro": "Nenhum dado carregado ainda."}), 400
-
     dados = dados_cache
     hoje = datetime.now().date()
     inicio_semana = hoje - timedelta(days=7)
@@ -74,7 +72,7 @@ def resumo_ligacoes():
         if "call_date" not in lig:
             continue
         data_lig = datetime.strptime(lig["call_date"][:10], "%Y-%m-%d").date()
-        agente = lig.get("agent", {}).get("name") or lig.get("agente_nome") or "Desconhecido"
+        agente = lig.get("agent") or lig.get("agente_nome") or "Desconhecido"
         qualificacao = lig.get("qualification", "")
 
         contagem_total += 1
@@ -116,44 +114,6 @@ def resumo_ligacoes():
     }
 
     return jsonify(resumo)
-
-@app.route("/api/graficos")
-def graficos():
-    global dados_cache
-    if not dados_cache:
-        return jsonify({"top_ligacoes": [], "top_fala": []})
-
-    dados = dados_cache
-    agentes = {}
-    tempos = {}
-    contagem = {}
-
-    for row in dados:
-        agente = row.get("agent", {}).get("name") or row.get("agente_nome") or "Desconhecido"
-        tempo = row.get("speaking_time")
-
-        if not agente or agente == "-" or agente == "Desconhecido":
-            continue
-
-        agentes[agente] = agentes.get(agente, 0) + 1
-
-        if tempo:
-            partes = tempo.split(":")
-            if len(partes) == 3:
-                segundos = int(partes[0]) * 3600 + int(partes[1]) * 60 + int(partes[2])
-                tempos[agente] = tempos.get(agente, 0) + segundos
-                contagem[agente] = contagem.get(agente, 0) + 1
-
-    top_ligacoes = sorted(agentes.items(), key=lambda x: x[1], reverse=True)[:5]
-    top_fala = sorted(
-        [(ag, tempos[ag] / contagem[ag]) for ag in tempos if contagem[ag] > 0],
-        key=lambda x: x[1], reverse=True
-    )[:5]
-
-    return jsonify({
-        "top_ligacoes": top_ligacoes,
-        "top_fala": [(ag, round(s, 1)) for ag, s in top_fala]
-    })
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
