@@ -95,10 +95,54 @@
     }
 
     async function carregarDados() {
-      // Gráficos futuros
-      if (chartAgentes) chartAgentes.destroy();
-      if (chartFala) chartFala.destroy();
-    }
+        try {
+          const resp = await fetch("/api/graficos");
+          const dados = await resp.json();
+    
+          const agentes1 = dados.top_ligacoes.map(item => item[0]);
+          const chamadas1 = dados.top_ligacoes.map(item => item[1]);
+    
+          const agentes2 = dados.top_fala.map(item => item[0]);
+          const tempos2 = dados.top_fala.map(item => item[1]);
+    
+          gerarGrafico('graficoAgentes', agentes1, chamadas1, 'Ligações', 'rgba(54, 162, 235, 0.6)', chartAgentes);
+          gerarGrafico('graficoFala', agentes2, tempos2, 'Tempo Médio (s)', 'rgba(255, 159, 64, 0.6)', chartFala);
+        } catch (e) {
+          console.error("Erro ao carregar gráficos:", e);
+        }
+      }
+    
+      function gerarGrafico(id, labels, dados, label, cor, chartInstance) {
+        const ctx = document.getElementById(id);
+        if (chartInstance) chartInstance.destroy();
+    
+        const novoGrafico = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: label,
+              data: dados,
+              backgroundColor: cor
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: false },
+              title: { display: false }
+            },
+            scales: {
+              y: { beginAtZero: true }
+            }
+          }
+        });
+    
+        if (id === 'graficoAgentes') chartAgentes = novoGrafico;
+        if (id === 'graficoFala') chartFala = novoGrafico;
+      }
+ 
+    
 
     function atualizarTudo() {
       carregarResumo();
