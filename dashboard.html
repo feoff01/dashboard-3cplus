@@ -27,7 +27,6 @@
   <button onclick="atualizarTudo()">🔄 Atualizar Agora</button>
   <div id="mensagemStatus"></div>
 
-  <!-- Cartões -->
   <div class="grid-cartoes">
     <div class="cartao cor-cinza"><strong>📅 Ligações hoje</strong><div id="statusHoje">-</div></div>
     <div class="cartao cor-cinza"><strong>📆 Ligações na semana</strong><div id="statusSemana">-</div></div>
@@ -39,7 +38,6 @@
     <div class="cartao cor-rosa"><strong>👑 Mais vendas por telefone no total</strong><div id="agenteVendasTotal">-</div></div>
   </div>
 
-  <!-- Gráficos (opcional para uso futuro) -->
   <div style="display:flex; gap:20px;">
     <div class="grafico-container"><h2>Top 5 Agentes</h2><canvas id="graficoAgentes"></canvas></div>
     <div class="grafico-container"><h2>Top 5 - Tempo Médio</h2><canvas id="graficoFala"></canvas></div>
@@ -95,9 +93,54 @@
     }
 
     async function carregarDados() {
-      // Gráficos futuros
       if (chartAgentes) chartAgentes.destroy();
       if (chartFala) chartFala.destroy();
+
+      try {
+        const resp = await fetch("/api/graficos");
+        const dados = await resp.json();
+
+        const nomesVendas = dados.top_vendas.map(i => i[0]);
+        const vendas = dados.top_vendas.map(i => i[1]);
+
+        const nomesTempo = dados.top_tempo.map(i => i[0]);
+        const tempos = dados.top_tempo.map(i => i[1]);
+
+        const ctx1 = document.getElementById("graficoAgentes").getContext("2d");
+        chartAgentes = new Chart(ctx1, {
+          type: "bar",
+          data: {
+            labels: nomesVendas,
+            datasets: [{ label: "Vendas por telefone", data: vendas }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: false },
+              title: { display: true, text: 'Top 5 Agentes - Vendas por Telefone' }
+            }
+          }
+        });
+
+        const ctx2 = document.getElementById("graficoFala").getContext("2d");
+        chartFala = new Chart(ctx2, {
+          type: "bar",
+          data: {
+            labels: nomesTempo,
+            datasets: [{ label: "Tempo médio de fala (s)", data: tempos }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: false },
+              title: { display: true, text: 'Top 5 Agentes - Tempo Médio de Fala' }
+            }
+          }
+        });
+
+      } catch (e) {
+        console.error("Erro ao carregar dados dos gráficos:", e);
+      }
     }
 
     function atualizarTudo() {

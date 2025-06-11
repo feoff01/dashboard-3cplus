@@ -9,7 +9,6 @@ TOKEN = "WxKTCV3PvjUAHLYy9sgmZ1bLsXM2qAnbL7jQYp6Qc8kmUgO9GJH0Zn7kUlDd"
 HEADERS = {"Authorization": f"Bearer {TOKEN}"}
 URL = "https://barsixp.3c.plus/api/v1/calls"
 
-# Armazena os dados da API em memória
 dados_cache = []
 
 @app.route("/")
@@ -114,6 +113,41 @@ def resumo_ligacoes():
     }
 
     return jsonify(resumo)
+
+@app.route("/api/graficos")
+def dados_graficos():
+    global dados_cache
+    dados = dados_cache
+
+    agentes_vendas = {}
+    tempos_fala = {}
+
+    for lig in dados:
+        agente = lig.get("agent") or lig.get("agente_nome") or "Desconhecido"
+        qualificacao = lig.get("qualification", "")
+        duracao = lig.get("talk_time") or 0
+
+        if qualificacao == "Venda feita por telefone":
+            agentes_vendas[agente] = agentes_vendas.get(agente, 0) + 1
+
+        if duracao:
+            duracao = int(duracao)
+            if agente in tempos_fala:
+                tempos_fala[agente]["soma"] += duracao
+                tempos_fala[agente]["contagem"] += 1
+            else:
+                tempos_fala[agente] = {"soma": duracao, "contagem": 1}
+
+    top_vendas = sorted(agentes_vendas.items(), key=lambda x: x[1], reverse=True)[:5]
+    top_tempo = sorted(
+        [(ag, v["soma"] / v["contagem"]) for ag, v in tempos_fala.items() if v["contagem"] > 0],
+        key=lambda x: x[1], reverse=True
+    )[:5]
+
+    return jsonify({
+        "top_vendas": top_vendas,
+        "top_tempo": top_tempo
+    })
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
