@@ -1,218 +1,78 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Dashboard 3C Plus</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
     h1 { color: #111; }
-
-    .grid-cartoes {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .cartao {
-      background: #ffffff;
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      height: 70px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .grafico-container {
-      flex: 1;
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-
-    canvas { max-width: 100%; }
-
-    button {
-      background-color: #0b5ed7;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-bottom: 20px;
-    }
-
-    button:hover {
-      background-color: #084eb1;
-    }
-
-    .cor-verde { background: #d1e7dd; }
-    .cor-azul { background: #cff4fc; }
-    .cor-laranja { background: #fce5cd; }
-    .cor-rosa { background: #f8d7da; }
-    .cor-cinza { background: #e2e3e5; }
+    .grid-cartoes { display: grid; grid-template-columns: repeat(4,1fr); gap:10px; margin-bottom:20px; }
+    .cartao { background:#fff; padding:15px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,.1); height:70px; display:flex; flex-direction:column; justify-content:space-between; }
+    .grafico-container { flex:1; background:#fff; padding:20px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,.1); }
+    canvas { max-width:100%; }
+    button { background:#0b5ed7; color:#fff; border:none; padding:10px 15px; border-radius:6px; cursor:pointer; margin-bottom:20px; }
+    button:hover { background:#084eb1; }
+    .cor-verde  { background:#d1e7dd; }
+    .cor-azul   { background:#cff4fc; }
+    .cor-laranja{ background:#fce5cd; }
+    .cor-rosa   { background:#f8d7da; }
+    .cor-cinza  { background:#e2e3e5; }
   </style>
 </head>
 <body>
-
   <h1>Dashboard de Ligações - 3C Plus</h1>
   <button onclick="atualizarTudo()">🔄 Atualizar Agora</button>
 
+  <!-- Cartões -->
   <div class="grid-cartoes">
-    <div class="cartao cor-cinza">
-      <strong>📅 Ligações hoje</strong>
-      <div id="statusHoje" style="font-size: 1.3em;">-</div>
-    </div>
-    <div class="cartao cor-cinza">
-      <strong>📆 Ligações na semana</strong>
-      <div id="statusSemana" style="font-size: 1.3em;">-</div>
-    </div>
-    <div class="cartao cor-cinza">
-      <strong>📞 Agente top hoje</strong>
-      <div id="statusAgenteTop" style="font-size: 1.2em;">-</div>
-    </div>
-    <div class="cartao cor-cinza">
-      <strong>📈 Total de ligações</strong>
-      <div id="statusTotal" style="font-size: 1.3em;">-</div>
-    </div>
-
-    <div class="cartao cor-verde">
-      <strong>📞 Vendas por telefone na semana</strong>
-      <div id="vendasSemana" style="font-size: 1.4em;">-</div>
-    </div>
-    <div class="cartao cor-azul">
-      <strong>📞 Total de vendas por telefone</strong>
-      <div id="vendasTotal" style="font-size: 1.4em;">-</div>
-    </div>
-    <div class="cartao cor-laranja">
-      <strong>👑 Mais vendas por telefone na semana</strong>
-      <div id="agenteVendasSemana" style="font-size: 1.2em;">-</div>
-    </div>
-    <div class="cartao cor-rosa">
-      <strong>👑 Mais vendas por telefone no total</strong>
-      <div id="agenteVendasTotal" style="font-size: 1.2em;">-</div>
-    </div>
+    <div class="cartao cor-cinza"><strong>📅 Ligações hoje</strong><div id="statusHoje">-</div></div>
+    <div class="cartao cor-cinza"><strong>📆 Ligações na semana</strong><div id="statusSemana">-</div></div>
+    <div class="cartao cor-cinza"><strong>📞 Agente top hoje</strong><div id="statusAgenteTop">-</div></div>
+    <div class="cartao cor-cinza"><strong>📈 Total de ligações</strong><div id="statusTotal">-</div></div>
+    <div class="cartao cor-verde"><strong>📞 Vendas por telefone na semana</strong><div id="vendasSemana">-</div></div>
+    <div class="cartao cor-azul"><strong>📞 Total de vendas por telefone</strong><div id="vendasTotal">-</div></div>
+    <div class="cartao cor-laranja"><strong>👑 Mais vendas por telefone na semana</strong><div id="agenteVendasSemana">-</div></div>
+    <div class="cartao cor-rosa"><strong>👑 Mais vendas por telefone no total</strong><div id="agenteVendasTotal">-</div></div>
   </div>
 
-  <div style="display: flex; gap: 20px;">
-    <div class="grafico-container">
-      <h2>Top 5 Agentes por Volume de Ligações</h2>
-      <canvas id="graficoAgentes"></canvas>
-    </div>
-    <div class="grafico-container">
-      <h2>Top 5 por Tempo Médio de Fala (s)</h2>
-      <canvas id="graficoFala"></canvas>
-    </div>
+  <!-- Gráficos (não carregam nada por enquanto) -->
+  <div style="display:flex; gap:20px;">
+    <div class="grafico-container"><h2>Top 5 Agentes</h2><canvas id="graficoAgentes"></canvas></div>
+    <div class="grafico-container"><h2>Top 5 - Tempo Médio</h2><canvas id="graficoFala"></canvas></div>
   </div>
 
   <script>
     let chartAgentes = null;
     let chartFala = null;
 
-    async function carregarDados() {
-      try {
-        const response = await fetch("/api/ligacoes");
-        const data = await response.json();
-
-        const agentesMap = {};
-        const temposMap = {};
-        const contagemMap = {};
-
-        data.forEach(row => {
-          const agente = row.agent?.name || row.agente_nome || row.agent || "Desconhecido";
-          const tempo = row.speaking_time;
-          if (!agente || agente === "-" || agente === "Desconhecido") return;
-
-          if (!agentesMap[agente]) {
-            agentesMap[agente] = 0;
-            temposMap[agente] = 0;
-            contagemMap[agente] = 0;
-          }
-
-          agentesMap[agente]++;
-          if (tempo) {
-            const partes = tempo.split(":");
-            if (partes.length === 3) {
-              const segundos = (+partes[0]) * 3600 + (+partes[1]) * 60 + (+partes[2]);
-              temposMap[agente] += segundos;
-              contagemMap[agente]++;
-            }
-          }
-        });
-
-        const agentesOrdenadosPorLigacoes = Object.entries(agentesMap)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 5);
-
-        const agentes1 = agentesOrdenadosPorLigacoes.map(([agente]) => agente);
-        const chamadas1 = agentesOrdenadosPorLigacoes.map(([_, qtd]) => qtd);
-
-        const mediaFala = Object.entries(temposMap).map(([agente, tempoTotal]) => {
-          const media = contagemMap[agente] ? tempoTotal / contagemMap[agente] : 0;
-          return [agente, media];
-        }).sort((a, b) => b[1] - a[1])
-          .slice(0, 5);
-
-        const agentes2 = mediaFala.map(([agente]) => agente);
-        const tempoFala = mediaFala.map(([_, media]) => media.toFixed(1));
-
-        gerarGrafico('graficoAgentes', agentes1, chamadas1, 'Ligações', 'rgba(54, 162, 235, 0.6)', chartAgentes);
-        gerarGrafico('graficoFala', agentes2, tempoFala, 'Tempo Médio (s)', 'rgba(255, 159, 64, 0.6)', chartFala);
-
-      } catch (error) {
-        console.error("❌ Erro ao carregar dados da API:", error);
-      }
-    }
-
     async function carregarResumo() {
       try {
         const resp = await fetch("/api/resumo");
         const resumo = await resp.json();
 
-        document.getElementById("statusHoje").textContent = resumo.contagem_hoje ?? '0';
-        document.getElementById("statusSemana").textContent = resumo.contagem_semana ?? '0';
-        document.getElementById("statusTotal").textContent = resumo.contagem_total ?? '0';
-
-        document.getElementById("vendasSemana").textContent = resumo.qualificacao_semana ?? '0';
-        document.getElementById("vendasTotal").textContent = resumo.qualificacao_total ?? '0';
-
+        document.getElementById("statusHoje").textContent         = resumo.contagem_hoje ?? '-';
+        document.getElementById("statusSemana").textContent       = resumo.contagem_semana ?? '-';
+        document.getElementById("statusAgenteTop").textContent    = `${resumo.agente_top_hoje} (${resumo.ligacoes_top_hoje})`;
+        document.getElementById("statusTotal").textContent        = resumo.contagem_total ?? '-';
+        document.getElementById("vendasSemana").textContent       = resumo.qualificacao_semana ?? '-';
+        document.getElementById("vendasTotal").textContent        = resumo.qualificacao_total ?? '-';
+        document.getElementById("agenteVendasSemana").textContent = `${resumo.agente_venda_semana} (${resumo.vendas_semana_agente})`;
+        document.getElementById("agenteVendasTotal").textContent  = `${resumo.agente_venda_total} (${resumo.vendas_total_agente})`;
       } catch (e) {
-        console.error("❌ Erro ao carregar resumo:", e);
+        console.error("Erro ao carregar resumo:", e);
       }
     }
 
-    function gerarGrafico(id, labels, dados, label, cor, chartInstance) {
-      const ctx = document.getElementById(id);
-      if (chartInstance) chartInstance.destroy();
-
-      const novoGrafico = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: label,
-            data: dados,
-            backgroundColor: cor
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: false },
-            title: { display: false }
-          },
-          scales: {
-            y: { beginAtZero: true }
-          }
-        }
-      });
-
-      if (id === 'graficoAgentes') chartAgentes = novoGrafico;
-      if (id === 'graficoFala') chartFala = novoGrafico;
+    async function carregarDados() {
+      try {
+        const resp = await fetch("/api/ligacoes");
+        const dados = await resp.json();
+        if (chartAgentes) chartAgentes.destroy();
+        if (chartFala) chartFala.destroy();
+      } catch (e) {
+        console.error("Erro ao carregar dados:", e);
+      }
     }
 
     function atualizarTudo() {
@@ -220,10 +80,7 @@
       carregarDados();
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-      atualizarTudo();
-      setInterval(atualizarTudo, 30000);
-    });
+    // Nada é carregado automaticamente ao abrir a página
   </script>
 </body>
 </html>
