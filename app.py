@@ -125,13 +125,18 @@ def dados_graficos():
     for lig in dados:
         agente = lig.get("agent") or lig.get("agente_nome") or "Desconhecido"
         qualificacao = lig.get("qualification", "")
-        duracao = lig.get("talk_time") or 0
+        duracao = lig.get("talk_time")
+
+        # Garantir que a duração seja um número válido
+        try:
+            duracao = int(duracao)
+        except (ValueError, TypeError):
+            duracao = 0
 
         if qualificacao == "Venda feita por telefone":
             agentes_vendas[agente] = agentes_vendas.get(agente, 0) + 1
 
-        if duracao:
-            duracao = int(duracao)
+        if duracao > 0:
             if agente in tempos_fala:
                 tempos_fala[agente]["soma"] += duracao
                 tempos_fala[agente]["contagem"] += 1
@@ -140,7 +145,7 @@ def dados_graficos():
 
     top_vendas = sorted(agentes_vendas.items(), key=lambda x: x[1], reverse=True)[:5]
     top_tempo = sorted(
-        [(ag, v["soma"] / v["contagem"]) for ag, v in tempos_fala.items() if v["contagem"] > 0],
+        [(ag, round(v["soma"] / v["contagem"], 1)) for ag, v in tempos_fala.items() if v["contagem"] > 0],
         key=lambda x: x[1], reverse=True
     )[:5]
 
