@@ -11,18 +11,21 @@
     .cartao { background:#fff; padding:15px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,.1); height:70px; display:flex; flex-direction:column; justify-content:space-between; }
     .grafico-container { flex:1; background:#fff; padding:20px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,.1); }
     canvas { max-width:100%; }
-    button { background:#0b5ed7; color:#fff; border:none; padding:10px 15px; border-radius:6px; cursor:pointer; margin-bottom:20px; }
+    button { background:#0b5ed7; color:#fff; border:none; padding:10px 15px; border-radius:6px; cursor:pointer; margin-right:10px; }
     button:hover { background:#084eb1; }
     .cor-verde  { background:#d1e7dd; }
     .cor-azul   { background:#cff4fc; }
     .cor-laranja{ background:#fce5cd; }
     .cor-rosa   { background:#f8d7da; }
     .cor-cinza  { background:#e2e3e5; }
+    #mensagemStatus { margin-top: 10px; font-weight: bold; }
   </style>
 </head>
 <body>
   <h1>Dashboard de Ligações - 3C Plus</h1>
+  <button onclick="pegarDados()">📡 Pegar Dados</button>
   <button onclick="atualizarTudo()">🔄 Atualizar Agora</button>
+  <div id="mensagemStatus"></div>
 
   <!-- Cartões -->
   <div class="grid-cartoes">
@@ -36,7 +39,7 @@
     <div class="cartao cor-rosa"><strong>👑 Mais vendas por telefone no total</strong><div id="agenteVendasTotal">-</div></div>
   </div>
 
-  <!-- Gráficos (não carregam nada por enquanto) -->
+  <!-- Gráficos (opcional para uso futuro) -->
   <div style="display:flex; gap:20px;">
     <div class="grafico-container"><h2>Top 5 Agentes</h2><canvas id="graficoAgentes"></canvas></div>
     <div class="grafico-container"><h2>Top 5 - Tempo Médio</h2><canvas id="graficoFala"></canvas></div>
@@ -45,6 +48,28 @@
   <script>
     let chartAgentes = null;
     let chartFala = null;
+
+    async function pegarDados() {
+      const msg = document.getElementById("mensagemStatus");
+      msg.style.color = "black";
+      msg.textContent = "⏳ Buscando dados da API...";
+
+      try {
+        const resp = await fetch("/api/pegar");
+        const json = await resp.json();
+        if (json.status === "ok") {
+          msg.style.color = "green";
+          msg.textContent = "✅ Dados prontos para exibir! Clique em Atualizar.";
+        } else {
+          msg.style.color = "red";
+          msg.textContent = "⚠️ Erro ao buscar dados: " + (json.erro || "erro desconhecido");
+        }
+      } catch (e) {
+        msg.style.color = "red";
+        msg.textContent = "❌ Erro na requisição.";
+        console.error(e);
+      }
+    }
 
     async function carregarResumo() {
       try {
@@ -59,28 +84,26 @@
         document.getElementById("vendasTotal").textContent        = resumo.qualificacao_total ?? '-';
         document.getElementById("agenteVendasSemana").textContent = `${resumo.agente_venda_semana} (${resumo.vendas_semana_agente})`;
         document.getElementById("agenteVendasTotal").textContent  = `${resumo.agente_venda_total} (${resumo.vendas_total_agente})`;
+
+        document.getElementById("mensagemStatus").textContent = "📊 Dados atualizados na tela.";
+        document.getElementById("mensagemStatus").style.color = "green";
       } catch (e) {
         console.error("Erro ao carregar resumo:", e);
+        document.getElementById("mensagemStatus").textContent = "❌ Falha ao atualizar os dados na tela.";
+        document.getElementById("mensagemStatus").style.color = "red";
       }
     }
 
     async function carregarDados() {
-      try {
-        const resp = await fetch("/api/ligacoes");
-        const dados = await resp.json();
-        if (chartAgentes) chartAgentes.destroy();
-        if (chartFala) chartFala.destroy();
-      } catch (e) {
-        console.error("Erro ao carregar dados:", e);
-      }
+      // Gráficos futuros
+      if (chartAgentes) chartAgentes.destroy();
+      if (chartFala) chartFala.destroy();
     }
 
     function atualizarTudo() {
       carregarResumo();
       carregarDados();
     }
-
-    // Nada é carregado automaticamente ao abrir a página
   </script>
 </body>
 </html>
