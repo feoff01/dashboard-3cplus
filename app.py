@@ -30,7 +30,7 @@ def pegar_dados():
                 "filters[created_at][from]": data_inicio.strftime("%Y-%m-%dT00:00:00Z"),
                 "filters[created_at][to]": data_hoje.strftime("%Y-%m-%dT23:59:59Z"),
                 "agent_ids[]": [],
-                "per_page": 1000,
+                "per_page": 500,
                 "page": page
             }
 
@@ -76,6 +76,9 @@ def resumo_ligacoes():
             continue
 
         agente = lig.get("agent") or lig.get("agente_nome") or "Desconhecido"
+        if not agente or not agente.strip():
+            continue  # Ignora agentes sem nome
+
         qualificacao = lig.get("qualification", "")
 
         contagem_total += 1
@@ -93,14 +96,18 @@ def resumo_ligacoes():
             qualificacao_total += 1
             agentes_qual_total[agente] = agentes_qual_total.get(agente, 0) + 1
 
-    agente_top_hoje = max(agentes_hoje, key=agentes_hoje.get) if agentes_hoje else "Nenhum agente"
-    ligacoes_top_hoje = agentes_hoje.get(agente_top_hoje, 0)
+    # Proteções contra agentes sem nome
+    def get_top_agente(agentes_dict):
+        agentes_validos = {k: v for k, v in agentes_dict.items() if k and k.strip()}
+        if agentes_validos:
+            top_agente = max(agentes_validos, key=agentes_validos.get)
+            return top_agente, agentes_validos[top_agente]
+        else:
+            return "Nenhum agente", 0
 
-    agente_venda_semana = max(agentes_qual_semana, key=agentes_qual_semana.get) if agentes_qual_semana else "Nenhum agente"
-    vendas_semana_agente = agentes_qual_semana.get(agente_venda_semana, 0)
-
-    agente_venda_total = max(agentes_qual_total, key=agentes_qual_total.get) if agentes_qual_total else "Nenhum agente"
-    vendas_total_agente = agentes_qual_total.get(agente_venda_total, 0)
+    agente_top_hoje, ligacoes_top_hoje = get_top_agente(agentes_hoje)
+    agente_venda_semana, vendas_semana_agente = get_top_agente(agentes_qual_semana)
+    agente_venda_total, vendas_total_agente = get_top_agente(agentes_qual_total)
 
     resumo = {
         "agente_top_hoje": agente_top_hoje,
@@ -128,6 +135,9 @@ def dados_graficos():
 
     for lig in dados:
         agente = lig.get("agent") or lig.get("agente_nome") or "Desconhecido"
+        if not agente or not agente.strip():
+            continue
+
         qualificacao = lig.get("qualification", "")
         data_lig = lig.get("call_date")
 
@@ -146,7 +156,7 @@ def dados_graficos():
 
     return jsonify({
         "top_vendas": top_vendas,
-        "top_tempo": []  # mantido vazio por compatibilidade
+        "top_tempo": []
     })
 
 if __name__ == "__main__":
