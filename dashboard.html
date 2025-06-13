@@ -80,7 +80,7 @@
   </div>
 
   <div class="grafico-container">
-    <h2 style="font-size: 24px;">Top Agentes</h2>
+    <h2 style="font-size: 24px;">Top 5 Agentes</h2>
     <canvas id="graficoAgentes"></canvas>
   </div>
 
@@ -172,7 +172,7 @@
               legend: { display: false },
               title: {
                 display: true,
-                text: 'Top Agentes - Vendas por Telefone',
+                text: 'Top 5 Agentes - Vendas por Telefone',
                 font: { size: 18 }
               }
             },
@@ -218,7 +218,7 @@
         await esperar(15000); // Espera 15s antes de atualizar a tela
         atualizarTudo();
 
-        await esperar(300000); // Espera agora 1 minuto antes de repetir
+        await esperar(60000); // Espera agora 1 minuto antes de repetir
       }
     }
 
