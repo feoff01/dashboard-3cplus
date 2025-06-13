@@ -9,7 +9,7 @@
     h1 { color: #111; }
     .grid-cartoes { display: grid; grid-template-columns: repeat(4,1fr); gap:10px; margin-bottom:20px; }
     .cartao { background:#fff; padding:15px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,.1); height:70px; display:flex; flex-direction:column; justify-content:space-between; }
-    .grafico-container { flex:1; background:#fff; padding:20px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,.1); }
+    .grafico-container { flex:1; background:#fff; padding:20px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,.1); margin-top:20px; }
     canvas { max-width:100%; }
     button { background:#0b5ed7; color:#fff; border:none; padding:10px 15px; border-radius:6px; cursor:pointer; margin-right:10px; }
     button:hover { background:#084eb1; }
@@ -38,14 +38,13 @@
     <div class="cartao cor-rosa"><strong>👑 Mais vendas por telefone no total</strong><div id="agenteVendasTotal">-</div></div>
   </div>
 
-  <div style="display:flex; gap:20px;">
-    <div class="grafico-container"><h2>Top 5 Agentes</h2><canvas id="graficoAgentes"></canvas></div>
-    <div class="grafico-container"><h2>Top 5 - Tempo Médio</h2><canvas id="graficoFala"></canvas></div>
+  <div class="grafico-container">
+    <h2>Top 5 Agentes</h2>
+    <canvas id="graficoAgentes"></canvas>
   </div>
 
   <script>
     let chartAgentes = null;
-    let chartFala = null;
 
     async function pegarDados() {
       const msg = document.getElementById("mensagemStatus");
@@ -94,7 +93,6 @@
 
     async function carregarDados() {
       if (chartAgentes) chartAgentes.destroy();
-      if (chartFala) chartFala.destroy();
 
       try {
         const resp = await fetch("/api/graficos");
@@ -102,9 +100,6 @@
 
         const nomesVendas = dados.top_vendas.map(i => i[0]);
         const vendas = dados.top_vendas.map(i => i[1]);
-
-        const nomesTempo = dados.top_tempo.map(i => i[0]);
-        const tempos = dados.top_tempo.map(i => i[1]);
 
         const ctx1 = document.getElementById("graficoAgentes").getContext("2d");
         chartAgentes = new Chart(ctx1, {
@@ -118,22 +113,6 @@
             plugins: {
               legend: { display: false },
               title: { display: true, text: 'Top 5 Agentes - Vendas por Telefone' }
-            }
-          }
-        });
-
-        const ctx2 = document.getElementById("graficoFala").getContext("2d");
-        chartFala = new Chart(ctx2, {
-          type: "bar",
-          data: {
-            labels: nomesTempo,
-            datasets: [{ label: "Tempo médio de fala (s)", data: tempos }]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: { display: false },
-              title: { display: true, text: 'Top 5 Agentes - Tempo Médio de Fala' }
             }
           }
         });
