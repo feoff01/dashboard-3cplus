@@ -5,8 +5,14 @@
   <title>Dashboard 3C Plus</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
-    h1 { color: #111; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f8f9fa;
+    }
+    h1 {
+      color: #111;
+    }
     .grid-cartoes {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -24,24 +30,33 @@
       justify-content: space-between;
     }
     .grafico-container {
-      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: stretch;
       background: #fff;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
       margin-top: 20px;
-      height: 250px;
+      height: 280px;
+      overflow: hidden;
     }
     canvas {
       width: 100% !important;
       height: 100% !important;
+      display: block;
+      box-sizing: border-box;
     }
     .cor-verde  { background: #d1e7dd; }
     .cor-azul   { background: #cff4fc; }
     .cor-laranja{ background: #fce5cd; }
     .cor-rosa   { background: #f8d7da; }
     .cor-cinza  { background: #e2e3e5; }
-    #mensagemStatus { margin-top: 10px; font-weight: bold; }
+    #mensagemStatus {
+      margin-top: 10px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -60,7 +75,7 @@
   </div>
 
   <div class="grafico-container">
-    <h2>Top Agentes</h2>
+    <h2>Top 5 Agentes</h2>
     <canvas id="graficoAgentes"></canvas>
   </div>
 
@@ -145,14 +160,18 @@
           options: {
             responsive: true,
             maintainAspectRatio: false,
+            layout: {
+              padding: { top: 10, bottom: 10, left: 0, right: 0 }
+            },
             plugins: {
               legend: { display: false },
-              title: { display: true, text: 'Top Agentes - Vendas por Telefone' }
+              title: {
+                display: true,
+                text: 'Top 5 Agentes - Vendas por Telefone'
+              }
             },
             scales: {
-              x: {
-                grid: { display: false }
-              },
+              x: { grid: { display: false } },
               y: {
                 beginAtZero: true,
                 grid: { display: false }
@@ -176,7 +195,7 @@
     }
 
     async function iniciarAtualizacaoAutomatica() {
-      await esperar(5000); // 5 segundos iniciais
+      await esperar(5000); // Espera inicial de 5s
 
       while (true) {
         await pegarDados();
@@ -189,10 +208,10 @@
           tentativas++;
         }
 
-        await esperar(15000); // espera 15s antes de atualizar a tela
+        await esperar(10000); // Espera 15s antes de atualizar a tela
         atualizarTudo();
 
-        await esperar(300000); // espera 5 minutos (300 mil ms) antes do próximo ciclo
+        await esperar(60000); // Espera 5 minutos antes de repetir
       }
     }
 
