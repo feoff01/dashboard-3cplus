@@ -7,11 +7,15 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 20px;
+      margin: 0;
+      padding: 20px;
       background: #f8f9fa;
+      box-sizing: border-box;
     }
     h1 {
       color: #111;
+      font-size: 32px;
+      margin-bottom: 20px;
     }
     .grid-cartoes {
       display: grid;
@@ -21,13 +25,14 @@
     }
     .cartao {
       background: #fff;
-      padding: 15px;
+      padding: 20px;
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      height: 70px;
+      height: 80px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      font-size: 18px;
     }
     .grafico-container {
       display: flex;
@@ -38,8 +43,7 @@
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      margin-top: 20px;
-      height: 280px;
+      height: calc(100vh - 320px); /* ajusta altura total da tela menos o header e cards */
       overflow: hidden;
     }
     canvas {
@@ -56,6 +60,7 @@
     #mensagemStatus {
       margin-top: 10px;
       font-weight: bold;
+      font-size: 18px;
     }
   </style>
 </head>
@@ -75,7 +80,7 @@
   </div>
 
   <div class="grafico-container">
-    <h2>Top 5 Agentes</h2>
+    <h2 style="font-size: 24px;">Top Agentes</h2>
     <canvas id="graficoAgentes"></canvas>
   </div>
 
@@ -167,14 +172,16 @@
               legend: { display: false },
               title: {
                 display: true,
-                text: 'Top 5 Agentes - Vendas por Telefone'
+                text: 'Top Agentes - Vendas por Telefone',
+                font: { size: 18 }
               }
             },
             scales: {
-              x: { grid: { display: false } },
+              x: { grid: { display: false }, ticks: { font: { size: 14 } } },
               y: {
                 beginAtZero: true,
-                grid: { display: false }
+                grid: { display: false },
+                ticks: { font: { size: 14 } }
               }
             }
           }
@@ -211,7 +218,7 @@
         await esperar(10000); // Espera 15s antes de atualizar a tela
         atualizarTudo();
 
-        await esperar(60000); // Espera 5 minutos antes de repetir
+        await esperar(60000); // Espera agora 1 minuto antes de repetir
       }
     }
 
