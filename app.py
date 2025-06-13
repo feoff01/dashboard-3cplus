@@ -30,7 +30,7 @@ def pegar_dados():
                 "filters[created_at][from]": data_inicio.strftime("%Y-%m-%dT00:00:00Z"),
                 "filters[created_at][to]": data_hoje.strftime("%Y-%m-%dT23:59:59Z"),
                 "agent_ids[]": [],
-                "per_page": 500,
+                "per_page": 1000,
                 "page": page
             }
 
