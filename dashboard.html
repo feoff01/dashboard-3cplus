@@ -9,7 +9,7 @@
     h1 { color: #111; }
     .grid-cartoes { display: grid; grid-template-columns: repeat(4,1fr); gap:10px; margin-bottom:20px; }
     .cartao { background:#fff; padding:15px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,.1); height:70px; display:flex; flex-direction:column; justify-content:space-between; }
-    .grafico-container { flex:1; background:#fff; padding:20px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,.1); margin-top:20px; height: 250px; }
+    .grafico-container { flex:1; background:#fff; padding:20px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,.1); margin-top:20px; height:250px; }
     canvas { max-width:100%; height:100% !important; }
     button { background:#0b5ed7; color:#fff; border:none; padding:10px 15px; border-radius:6px; cursor:pointer; margin-right:10px; }
     button:hover { background:#084eb1; }
@@ -56,7 +56,7 @@
         const json = await resp.json();
         if (json.status === "ok") {
           msg.style.color = "green";
-          msg.textContent = "✅ Dados prontos para exibir! Clique em Atualizar.";
+          msg.textContent = "📊 Dados atualizados na tela.";
         } else {
           msg.style.color = "red";
           msg.textContent = "⚠️ Erro ao buscar dados: " + (json.erro || "erro desconhecido");
@@ -127,6 +127,34 @@
       carregarResumo();
       carregarDados();
     }
+
+    // Atualização automática contínua com os intervalos definidos
+    function esperar(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function iniciarAtualizacaoAutomatica() {
+      await esperar(5000); // Espera inicial de 5 segundos
+
+      while (true) {
+        await pegarDados();
+
+        // Espera até que a mensagem de dados prontos apareça
+        let tentativas = 0;
+        while (tentativas < 30) {
+          const msg = document.getElementById("mensagemStatus").textContent;
+          if (msg.includes("Dados atualizados na tela.")) break;
+          await esperar(1000);
+          tentativas++;
+        }
+
+        await esperar(15000); // Espera 15s após os dados estarem prontos
+        atualizarTudo();      // Atualiza o conteúdo na tela
+        await esperar(300000); // Espera 5 minutos antes de repetir
+      }
+    }
+
+    iniciarAtualizacaoAutomatica();
   </script>
 </body>
 </html>
