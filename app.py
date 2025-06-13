@@ -22,7 +22,7 @@ def pegar_dados():
     dados = []
     page = 1
     data_hoje = datetime.now()
-    data_inicio = data_hoje - timedelta(days=7)
+    data_inicio = data_hoje - timedelta(days=30)
 
     try:
         while True:
@@ -70,7 +70,11 @@ def resumo_ligacoes():
     for lig in dados:
         if "call_date" not in lig:
             continue
-        data_lig = datetime.strptime(lig["call_date"][:10], "%Y-%m-%d").date()
+        try:
+            data_lig = datetime.strptime(lig["call_date"][:10], "%Y-%m-%d").date()
+        except:
+            continue
+
         agente = lig.get("agent") or lig.get("agente_nome") or "Desconhecido"
         qualificacao = lig.get("qualification", "")
 
@@ -120,38 +124,29 @@ def dados_graficos():
     dados = dados_cache
 
     agentes_vendas = {}
-    tempos_fala = {}
+    trinta_dias_atras = datetime.now().date() - timedelta(days=30)
 
     for lig in dados:
         agente = lig.get("agent") or lig.get("agente_nome") or "Desconhecido"
         qualificacao = lig.get("qualification", "")
-        duracao = lig.get("talk_time")
+        data_lig = lig.get("call_date")
 
-        # Garantir que a duração seja um número válido
+        if not data_lig:
+            continue
+
         try:
-            duracao = int(duracao)
-        except (ValueError, TypeError):
-            duracao = 0
+            data_formatada = datetime.strptime(data_lig[:10], "%Y-%m-%d").date()
+        except ValueError:
+            continue
 
-        if qualificacao == "Venda feita por telefone":
+        if qualificacao == "Venda feita por telefone" and data_formatada >= trinta_dias_atras:
             agentes_vendas[agente] = agentes_vendas.get(agente, 0) + 1
 
-        if duracao > 0:
-            if agente in tempos_fala:
-                tempos_fala[agente]["soma"] += duracao
-                tempos_fala[agente]["contagem"] += 1
-            else:
-                tempos_fala[agente] = {"soma": duracao, "contagem": 1}
-
     top_vendas = sorted(agentes_vendas.items(), key=lambda x: x[1], reverse=True)[:5]
-    top_tempo = sorted(
-        [(ag, round(v["soma"] / v["contagem"], 1)) for ag, v in tempos_fala.items() if v["contagem"] > 0],
-        key=lambda x: x[1], reverse=True
-    )[:5]
 
     return jsonify({
         "top_vendas": top_vendas,
-        "top_tempo": top_tempo
+        "top_tempo": []  # mantido vazio por compatibilidade
     })
 
 if __name__ == "__main__":
