@@ -7,15 +7,40 @@
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
     h1 { color: #111; }
-    .grid-cartoes { display: grid; grid-template-columns: repeat(4,1fr); gap:10px; margin-bottom:20px; }
-    .cartao { background:#fff; padding:15px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,.1); height:70px; display:flex; flex-direction:column; justify-content:space-between; }
-    .grafico-container { flex:1; background:#fff; padding:20px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,.1); margin-top:20px; height:250px; }
-    canvas { max-width:100%; height:100% !important; }
-    .cor-verde  { background:#d1e7dd; }
-    .cor-azul   { background:#cff4fc; }
-    .cor-laranja{ background:#fce5cd; }
-    .cor-rosa   { background:#f8d7da; }
-    .cor-cinza  { background:#e2e3e5; }
+    .grid-cartoes {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .cartao {
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      height: 70px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .grafico-container {
+      flex: 1;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+      height: 250px;
+    }
+    canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+    .cor-verde  { background: #d1e7dd; }
+    .cor-azul   { background: #cff4fc; }
+    .cor-laranja{ background: #fce5cd; }
+    .cor-rosa   { background: #f8d7da; }
+    .cor-cinza  { background: #e2e3e5; }
     #mensagemStatus { margin-top: 10px; font-weight: bold; }
   </style>
 </head>
@@ -35,7 +60,7 @@
   </div>
 
   <div class="grafico-container">
-    <h2>Top 5 Agentes</h2>
+    <h2>Top Agentes</h2>
     <canvas id="graficoAgentes"></canvas>
   </div>
 
@@ -97,19 +122,41 @@
         const nomesVendas = dados.top_vendas.map(i => i[0]);
         const vendas = dados.top_vendas.map(i => i[1]);
 
+        const cores = [
+          'rgba(75, 192, 192, 0.9)',
+          'rgba(255, 99, 132, 0.9)',
+          'rgba(255, 206, 86, 0.9)',
+          'rgba(54, 162, 235, 0.9)',
+          'rgba(153, 102, 255, 0.9)'
+        ];
+
         const ctx1 = document.getElementById("graficoAgentes").getContext("2d");
         chartAgentes = new Chart(ctx1, {
           type: "bar",
           data: {
             labels: nomesVendas,
-            datasets: [{ label: "Vendas por telefone", data: vendas }]
+            datasets: [{
+              label: "Vendas por telefone",
+              data: vendas,
+              backgroundColor: cores.slice(0, vendas.length),
+              borderWidth: 0
+            }]
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
               legend: { display: false },
-              title: { display: true, text: 'Top 5 Agentes - Vendas por Telefone' }
+              title: { display: true, text: 'Top Agentes - Vendas por Telefone' }
+            },
+            scales: {
+              x: {
+                grid: { display: false }
+              },
+              y: {
+                beginAtZero: true,
+                grid: { display: false }
+              }
             }
           }
         });
@@ -129,7 +176,7 @@
     }
 
     async function iniciarAtualizacaoAutomatica() {
-      await esperar(5000);
+      await esperar(5000); // 5 segundos iniciais
 
       while (true) {
         await pegarDados();
@@ -142,9 +189,10 @@
           tentativas++;
         }
 
-        await esperar(15000);
+        await esperar(15000); // espera 15s antes de atualizar a tela
         atualizarTudo();
-        await esperar(300000); // 5 minutos
+
+        await esperar(300000); // espera 5 minutos (300 mil ms) antes do próximo ciclo
       }
     }
 
