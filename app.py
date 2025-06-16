@@ -42,8 +42,11 @@ def pegar_dados():
             if not page_data:
                 break
 
-            # 🔍 Filtro para considerar apenas chamadas iniciadas com sucesso
-            chamadas_validas = [lig for lig in page_data if lig.get("call_status") == "completed"]
+            chamadas_validas = [
+                lig for lig in page_data
+                if lig.get("readable_status_text") == "Finalizada"
+                and lig.get("speaking_time", "00:00:00") > "00:00:00"
+            ]
 
             dados.extend(chamadas_validas)
             page += 1
@@ -53,9 +56,6 @@ def pegar_dados():
 
     except requests.exceptions.RequestException as e:
         return jsonify({"erro": f"Erro ao acessar a API: {e}"}), 500
-
-# As demais rotas permanecem as mesmas, pois já usam os dados do cache filtrado
-# (não é necessário revalidar o call_status nelas)
 
 @app.route("/api/resumo")
 def resumo_ligacoes():
