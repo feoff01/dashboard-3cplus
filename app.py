@@ -2,7 +2,7 @@ from flask import Flask, jsonify, send_file
 import requests
 import os
 from datetime import datetime, timedelta
-#e
+
 app = Flask(__name__)
 
 TOKEN = "WxKTCV3PvjUAHLYy9sgmZ1bLsXM2qAnbL7jQYp6Qc8kmUgO9GJH0Zn7kUlDd"
@@ -61,8 +61,15 @@ def pegar_dados():
 def resumo_ligacoes():
     global dados_cache
     dados = dados_cache
+
+    def obter_inicio_e_fim_da_semana():
+        hoje = datetime.today()
+        inicio = hoje - timedelta(days=hoje.weekday())  # Segunda
+        fim = inicio + timedelta(days=6)                # Domingo
+        return inicio.date(), fim.date()
+
     hoje = datetime.now().date()
-    inicio_semana = hoje - timedelta(days=7)
+    inicio_semana, fim_semana = obter_inicio_e_fim_da_semana()
 
     contagem_total = 0
     contagem_hoje = 0
@@ -85,7 +92,7 @@ def resumo_ligacoes():
         qualificacao = lig.get("qualification", "")
 
         contagem_total += 1
-        if inicio_semana <= data_lig <= hoje:
+        if inicio_semana <= data_lig <= fim_semana:
             contagem_semana += 1
             if qualificacao == "Venda feita por telefone":
                 qualificacao_semana += 1

@@ -5,64 +5,76 @@
   <title>Dashboard 3C Plus</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     html, body {
       margin: 0;
       padding: 0;
-      height: 100%;
-      box-sizing: border-box;
+      height: 100vh;
       font-family: Arial, sans-serif;
       background: #f8f9fa;
     }
 
     body {
+      display: flex;
+      flex-direction: column;
       padding: 20px;
     }
 
     h1 {
       color: #111;
-      font-size: 32px;
-      margin-bottom: 20px;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    #mensagemStatus {
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 10px;
     }
 
     .grid-cartoes {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 10px;
-      margin-bottom: 20px;
+      flex: 0 0 auto;
+      margin-bottom: 10px;
     }
 
     .cartao {
       background: #fff;
-      padding: 20px;
+      padding: 12px;
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      height: 80px;
+      font-size: 16px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      font-size: 18px;
+      height: 70px;
     }
 
     .grafico-container {
+      flex: 1;
       background: #fff;
-      padding: 20px;
+      padding: 10px;
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      height: calc(100vh - 360px); /* altura total menos o espaço ocupado pelos outros elementos */
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
 
     .grafico-container h2 {
-      font-size: 24px;
-      margin-bottom: 10px;
+      font-size: 20px;
+      margin: 0 0 8px 0;
     }
 
     canvas {
       flex: 1;
       width: 100% !important;
       height: 100% !important;
-      display: block;
     }
 
     .cor-verde  { background: #d1e7dd; }
@@ -70,27 +82,21 @@
     .cor-laranja{ background: #fce5cd; }
     .cor-rosa   { background: #f8d7da; }
     .cor-cinza  { background: #e2e3e5; }
-
-    #mensagemStatus {
-      margin-top: 10px;
-      font-weight: bold;
-      font-size: 18px;
-    }
   </style>
 </head>
 <body>
   <h1>Dashboard de Ligações - 3C Plus</h1>
-  <div id="mensagemStatus"></div>
+  <div id="mensagemStatus">Carregando...</div>
 
   <div class="grid-cartoes">
     <div class="cartao cor-cinza"><strong>📅 Ligações hoje</strong><div id="statusHoje">-</div></div>
     <div class="cartao cor-cinza"><strong>📆 Ligações na semana</strong><div id="statusSemana">-</div></div>
     <div class="cartao cor-cinza"><strong>📞 Agente top hoje</strong><div id="statusAgenteTop">-</div></div>
     <div class="cartao cor-cinza"><strong>📈 Total de ligações</strong><div id="statusTotal">-</div></div>
-    <div class="cartao cor-verde"><strong>📞 Vendas por telefone na semana</strong><div id="vendasSemana">-</div></div>
-    <div class="cartao cor-azul"><strong>📞 Total de vendas por telefone</strong><div id="vendasTotal">-</div></div>
-    <div class="cartao cor-laranja"><strong>👑 Mais vendas por telefone na semana</strong><div id="agenteVendasSemana">-</div></div>
-    <div class="cartao cor-rosa"><strong>👑 Mais vendas por telefone no total</strong><div id="agenteVendasTotal">-</div></div>
+    <div class="cartao cor-verde"><strong>📞 Vendas na semana</strong><div id="vendasSemana">-</div></div>
+    <div class="cartao cor-azul"><strong>📞 Total de vendas</strong><div id="vendasTotal">-</div></div>
+    <div class="cartao cor-laranja"><strong>👑 Vendas semana (agente)</strong><div id="agenteVendasSemana">-</div></div>
+    <div class="cartao cor-rosa"><strong>👑 Vendas total (agente)</strong><div id="agenteVendasTotal">-</div></div>
   </div>
 
   <div class="grafico-container">
@@ -105,7 +111,6 @@
       const msg = document.getElementById("mensagemStatus");
       msg.style.color = "black";
       msg.textContent = "⏳ Buscando dados da API...";
-
       try {
         const resp = await fetch("/api/pegar");
         const json = await resp.json();
@@ -127,7 +132,6 @@
       try {
         const resp = await fetch("/api/resumo");
         const resumo = await resp.json();
-
         document.getElementById("statusHoje").textContent         = resumo.contagem_hoje ?? '-';
         document.getElementById("statusSemana").textContent       = resumo.contagem_semana ?? '-';
         document.getElementById("statusAgenteTop").textContent    = `${resumo.agente_top_hoje} (${resumo.ligacoes_top_hoje})`;
@@ -152,7 +156,6 @@
       try {
         const resp = await fetch("/api/graficos");
         const dados = await resp.json();
-
         const nomesVendas = dados.top_vendas.map(i => i[0]);
         const vendas = dados.top_vendas.map(i => i[1]);
 
@@ -179,24 +182,17 @@
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            layout: {
-              padding: { top: 10, bottom: 10, left: 0, right: 0 }
-            },
             plugins: {
               legend: { display: false },
               title: {
                 display: true,
                 text: 'Top 5 Agentes - Vendas por Telefone',
-                font: { size: 18 }
+                font: { size: 16 }
               }
             },
             scales: {
-              x: { grid: { display: false }, ticks: { font: { size: 14 } } },
-              y: {
-                beginAtZero: true,
-                grid: { display: false },
-                ticks: { font: { size: 14 } }
-              }
+              x: { grid: { display: false }, ticks: { font: { size: 12 } } },
+              y: { beginAtZero: true, grid: { display: false }, ticks: { font: { size: 12 } } }
             }
           }
         });
@@ -216,11 +212,9 @@
     }
 
     async function iniciarAtualizacaoAutomatica() {
-      await esperar(5000); // Espera inicial de 5s
-
+      await esperar(5000);
       while (true) {
         await pegarDados();
-
         let tentativas = 0;
         while (tentativas < 30) {
           const msg = document.getElementById("mensagemStatus").textContent;
@@ -228,11 +222,9 @@
           await esperar(1000);
           tentativas++;
         }
-
-        await esperar(15000); // Espera 15s antes de atualizar a tela
+        await esperar(15000);
         atualizarTudo();
-
-        await esperar(60000); // Espera agora 1 minuto antes de repetir
+        await esperar(60000);
       }
     }
 
