@@ -146,7 +146,7 @@ def dados_graficos():
 
     return jsonify({
         "top_vendas": top_vendas,
-        "top_tempo": []  # mantido vazio por compatibilidade2
+        "top_tempo": []  # mantido vazio por compatibilidade24
     })
 
 if __name__ == "__main__":
