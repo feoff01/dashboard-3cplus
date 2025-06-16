@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>Dashboard 3C Plus</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -186,15 +187,35 @@
               legend: { display: false },
               title: {
                 display: true,
-                text: 'Top 5 Agentes - Vendas por Telefone',
+                text: 'Top 5 Agentes - Vendas no Mês',
                 font: { size: 16 }
+              },
+              datalabels: {
+                anchor: 'end',
+                align: 'start',
+                color: '#000',
+                font: {
+                  weight: 'bold',
+                  size: 14
+                },
+                formatter: function(value) {
+                  return value;
+                }
               }
             },
             scales: {
-              x: { grid: { display: false }, ticks: { font: { size: 12 } } },
-              y: { beginAtZero: true, grid: { display: false }, ticks: { font: { size: 12 } } }
+              x: {
+                grid: { display: false },
+                ticks: { font: { size: 12 } }
+              },
+              y: {
+                beginAtZero: true,
+                grid: { display: false },
+                ticks: { font: { size: 12 } }
+              }
             }
-          }
+          },
+          plugins: [ChartDataLabels]
         });
 
       } catch (e) {
