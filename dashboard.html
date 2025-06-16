@@ -5,24 +5,39 @@
   <title>Dashboard 3C Plus</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 20px;
       background: #f8f9fa;
-      box-sizing: border-box;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
+
     h1 {
       color: #111;
       font-size: 32px;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
+
+    #mensagemStatus {
+      margin: 10px 0;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
     .grid-cartoes {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 10px;
       margin-bottom: 20px;
     }
+
     .cartao {
       background: #fff;
       padding: 20px;
@@ -34,34 +49,39 @@
       justify-content: space-between;
       font-size: 18px;
     }
-    .grafico-container {
+
+    .grafico-wrapper {
+      flex: 1;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: stretch;
+      overflow: hidden;
+    }
+
+    .grafico-titulo {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .grafico-container {
+      flex: 1;
       background: #fff;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      height: 100%; /* ajusta altura total da tela menos o header e cards */
       overflow: hidden;
     }
+
     canvas {
       width: 100% !important;
       height: 100% !important;
       display: block;
-      box-sizing: border-box;
     }
+
     .cor-verde  { background: #d1e7dd; }
     .cor-azul   { background: #cff4fc; }
     .cor-laranja{ background: #fce5cd; }
     .cor-rosa   { background: #f8d7da; }
     .cor-cinza  { background: #e2e3e5; }
-    #mensagemStatus {
-      margin-top: 10px;
-      font-weight: bold;
-      font-size: 18px;
-    }
   </style>
 </head>
 <body>
@@ -79,9 +99,11 @@
     <div class="cartao cor-rosa"><strong>👑 Mais vendas por telefone no total</strong><div id="agenteVendasTotal">-</div></div>
   </div>
 
-  <div class="grafico-container">
-    <h2 style="font-size: 24px;">Top 5 Agentes</h2>
-    <canvas id="graficoAgentes"></canvas>
+  <div class="grafico-wrapper">
+    <div class="grafico-titulo">Top 5 Agentes</div>
+    <div class="grafico-container">
+      <canvas id="graficoAgentes"></canvas>
+    </div>
   </div>
 
   <script>
@@ -215,10 +237,10 @@
           tentativas++;
         }
 
-        await esperar(15000); // Espera 15s antes de atualizar a tela2
+        await esperar(15000); // Espera 15s antes de atualizar
         atualizarTudo();
 
-        await esperar(60000); // Espera agora 1 minuto antes de repetir
+        await esperar(60000); // Espera 1 minuto antes de repetir
       }
     }
 
