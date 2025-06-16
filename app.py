@@ -70,6 +70,7 @@ def resumo_ligacoes():
 
     hoje = datetime.now().date()
     inicio_semana, fim_semana = obter_inicio_e_fim_da_semana()
+    inicio_mes = hoje.replace(day=1)
 
     contagem_total = 0
     contagem_hoje = 0
@@ -91,20 +92,24 @@ def resumo_ligacoes():
         agente = lig.get("agent") or lig.get("agente_nome") or "Desconhecido"
         qualificacao = lig.get("qualification", "")
 
-        contagem_total += 1
+        # ✅ Total do mês (1º dia até hoje)
+        if data_lig >= inicio_mes:
+            contagem_total += 1
+            if qualificacao == "Venda feita por telefone":
+                qualificacao_total += 1
+                agentes_qual_total[agente] = agentes_qual_total.get(agente, 0) + 1
+
+        # ✅ Semana atual (segunda a domingo)
         if inicio_semana <= data_lig <= fim_semana:
             contagem_semana += 1
             if qualificacao == "Venda feita por telefone":
                 qualificacao_semana += 1
                 agentes_qual_semana[agente] = agentes_qual_semana.get(agente, 0) + 1
 
+        # ✅ Hoje
         if data_lig == hoje:
             contagem_hoje += 1
             agentes_hoje[agente] = agentes_hoje.get(agente, 0) + 1
-
-        if qualificacao == "Venda feita por telefone":
-            qualificacao_total += 1
-            agentes_qual_total[agente] = agentes_qual_total.get(agente, 0) + 1
 
     agente_top_hoje = max(agentes_hoje, key=agentes_hoje.get) if agentes_hoje else "Nenhum agente"
     ligacoes_top_hoje = agentes_hoje.get(agente_top_hoje, 0)
@@ -120,8 +125,8 @@ def resumo_ligacoes():
         "ligacoes_top_hoje": ligacoes_top_hoje,
         "contagem_hoje": contagem_hoje,
         "contagem_semana": contagem_semana,
-        "contagem_total": contagem_total,
-        "qualificacao_total": qualificacao_total,
+        "contagem_total": contagem_total,  # total no mês
+        "qualificacao_total": qualificacao_total,  # total no mês
         "qualificacao_semana": qualificacao_semana,
         "agente_venda_total": agente_venda_total,
         "vendas_total_agente": vendas_total_agente,
