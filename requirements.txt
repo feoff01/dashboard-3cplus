@@ -1,4 +1,4 @@
-Flask
 flask_cors
 requests
-gunicorn
+Flask==2.2.5
+gunicorn==21.2.0
