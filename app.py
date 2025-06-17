@@ -145,7 +145,7 @@ def dados_graficos():
     agentes_ligacoes_semana = {}
     hoje = datetime.now().date()
     inicio_semana = hoje - timedelta(days=hoje.weekday())
-    trinta_dias_atras = hoje - timedelta(days=30)
+    inicio_mes = hoje.replace(day=1)
 
     for lig in dados:
         agente = lig.get("agent") or lig.get("agente_nome") or "Desconhecido"
@@ -160,7 +160,7 @@ def dados_graficos():
         except ValueError:
             continue
 
-        if qualificacao == "Venda feita por telefone" and data_formatada >= trinta_dias_atras:
+        if qualificacao == "Venda feita por telefone" and data_formatada >= inicio_mes:
             agentes_vendas[agente] = agentes_vendas.get(agente, 0) + 1
 
         if inicio_semana <= data_formatada <= hoje:
