@@ -21,18 +21,19 @@
     body {
       display: flex;
       flex-direction: column;
-      padding: 20px;
+      padding: 0 20px 0 20px;
     }
+    
 
     h1 {
       color: #111;
-      font-size: 54px;
-      margin-bottom: 20px;
+      font-size: 42px;
+      margin-bottom: 15px;
     }
 
     #mensagemStatus {
       font-weight: bold;
-      font-size: 28px;
+      font-size: 22px;
       margin-bottom: 20px;
     }
 
@@ -46,14 +47,24 @@
 
     .cartao {
       background: #fff;
-      padding: 8px;
+      padding: 12px;
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      font-size: 22px;
-      height: 70px;
+      height: 90px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      justify-content: center;
+      font-size: 22px;
+    }
+    
+    .cartao strong {
+      font-size: 25px;
+    }
+    
+    .cartao div {
+      font-size: 23px;
+      font-weight: bold;
+      margin-top: 4px;
     }
 
     .grafico-container {
@@ -92,14 +103,14 @@
     <div class="cartao cor-cinza"><strong>📅 Ligações hoje</strong><div id="statusHoje">-</div></div>
     <div class="cartao cor-cinza"><strong>📆 Ligações na semana</strong><div id="statusSemana">-</div></div>
     <div class="cartao cor-cinza"><strong>📞 Agente top hoje</strong><div id="statusAgenteTop">-</div></div>
-    <div class="cartao cor-cinza"><strong>📈 Total de ligações no mês</strong><div id="statusTotal">-</div></div>
+    <div class="cartao cor-cinza"><strong>📈 Total ligações mês</strong><div id="statusTotal">-</div></div>
     <div class="cartao cor-verde"><strong>📞 Vendas na semana</strong><div id="vendasSemana">-</div></div>
     <div class="cartao cor-azul"><strong>📞 Total de vendas no mês</strong><div id="vendasTotal">-</div></div>
-    <div class="cartao cor-laranja"><strong>👑 Vendas semana (agente)</strong><div id="agenteVendasSemana">-</div></div>
-    <div class="cartao cor-rosa"><strong>👑 Vendas total (agente)</strong><div id="agenteVendasTotal">-</div></div>
+    <div class="cartao cor-laranja"><strong>👑 Venda semana(agente)</strong><div id="agenteVendasSemana">-</div></div>
+    <div class="cartao cor-rosa"><strong>👑 Vendas no mês(agente)</strong><div id="agenteVendasTotal">-</div></div>
   </div>
 
-  <div style="display: flex; gap: 20px; height: 50vh;">
+  <div style="display: flex; gap: 20px; height: 75vh; margin-top: 10px;">
     <div class="grafico-container" style="flex: 1;">
       <h2>Top 5 Agentes - Vendas no Mês</h2>
       <canvas id="graficoAgentes"></canvas>
@@ -162,10 +173,10 @@
         const resp = await fetch("/api/graficos");
         const dados = await resp.json();
 
-        const nomesVendas = dados.top_vendas.map(i => i[0]);
+        const nomesVendas = dados.top_vendas.map(i => i[0].split(" ")[0]);
         const vendas = dados.top_vendas.map(i => i[1]);
 
-        const nomesSemana = dados.top_ligacoes_semana.map(i => i[0]);
+        const nomesSemana = dados.top_ligacoes_semana.map(i => i[0].split(" ")[0]);
         const ligacoesSemana = dados.top_ligacoes_semana.map(i => i[1]);
 
         const cores = [
@@ -179,36 +190,78 @@
         const datalabelsConfig = {
           anchor: 'end',
           align: 'end',
-          backgroundColor: '#fff',
+          backgroundColor: '#ffffff',
           borderRadius: 6,
-          padding: 6,
+          borderWidth: 1,
+          borderColor: '#ccc',
+          padding: {
+            top: 6,
+            bottom: 6,
+            left: 10,
+            right: 10
+          },
           color: '#000',
           font: {
             weight: 'bold',
-            size: 20
+            size: 18
           },
-          formatter: value => value
+          formatter: value => value,
+          shadowBlur: 4,
+          shadowColor: "rgba(0, 0, 0, 0.2)"
         };
+        
 
         const optionsBase = {
           responsive: true,
           maintainAspectRatio: false,
+          layout: {
+            padding: {
+              top: 30,
+              bottom: 50  // agora também espaço para nomes longos no eixo X
+            }
+          },
           plugins: {
             legend: { display: false },
-            datalabels: datalabelsConfig
+            datalabels: {
+              anchor: 'end',
+              align: 'end',
+              backgroundColor: '#fff9c4',  // amarelo claro (material yellow 100)
+
+              borderRadius: 6,
+              borderWidth: 1,
+              borderColor: '#ccc',
+              padding: {
+                top: 6,
+                bottom: 6,
+                left: 10,
+                right: 10
+              },
+              color: '#000',
+              font: {
+                weight: 'bold',
+                size: 18
+              },
+              formatter: value => value
+            }
           },
           scales: {
             x: {
-              ticks: { font: { size: 18 } },
+              ticks: {
+                font: { size: 20 },
+                maxRotation: 10,
+                minRotation: 10,
+                padding: 10
+              },
               grid: { display: false }
             },
             y: {
               beginAtZero: true,
-              ticks: { font: { size: 18 } },
+              ticks: { font: { size: 16 } },
               grid: { display: false }
             }
           }
         };
+        
 
         chartAgentes = new Chart(document.getElementById("graficoAgentes").getContext("2d"), {
           type: "bar",
