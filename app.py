@@ -126,7 +126,7 @@ def resumo_ligacoes():
         "contagem_hoje": contagem_hoje,
         "contagem_semana": contagem_semana,
         "contagem_total": contagem_total,  # total no mês
-        "qualificacao_total": qualificacao_total,  # total no mês
+        "qualificacao_total": qualificacao_total,  # total no mês2
         "qualificacao_semana": qualificacao_semana,
         "agente_venda_total": agente_venda_total,
         "vendas_total_agente": vendas_total_agente,
