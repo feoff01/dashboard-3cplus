@@ -142,7 +142,10 @@ def dados_graficos():
     dados = dados_cache
 
     agentes_vendas = {}
-    trinta_dias_atras = datetime.now().date() - timedelta(days=30)
+    agentes_ligacoes_semana = {}
+    hoje = datetime.now().date()
+    inicio_semana = hoje - timedelta(days=hoje.weekday())
+    trinta_dias_atras = hoje - timedelta(days=30)
 
     for lig in dados:
         agente = lig.get("agent") or lig.get("agente_nome") or "Desconhecido"
@@ -160,12 +163,17 @@ def dados_graficos():
         if qualificacao == "Venda feita por telefone" and data_formatada >= trinta_dias_atras:
             agentes_vendas[agente] = agentes_vendas.get(agente, 0) + 1
 
+        if inicio_semana <= data_formatada <= hoje:
+            agentes_ligacoes_semana[agente] = agentes_ligacoes_semana.get(agente, 0) + 1
+
     top_vendas = sorted(agentes_vendas.items(), key=lambda x: x[1], reverse=True)[:5]
+    top_ligacoes_semana = sorted(agentes_ligacoes_semana.items(), key=lambda x: x[1], reverse=True)[:5]
 
     return jsonify({
         "top_vendas": top_vendas,
-        "top_tempo": []
+        "top_ligacoes_semana": top_ligacoes_semana
     })
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
