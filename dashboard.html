@@ -16,6 +16,7 @@
       height: 100vh;
       font-family: Arial, sans-serif;
       background: #f8f9fa;
+  
     }
 
     body {
@@ -68,7 +69,7 @@
     }
 
     .grafico-container {
-      background: #fff;
+      background:#fff;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
@@ -98,7 +99,7 @@
 <body>
   <!--<h1>Dashboard de Ligações - 3C Plus</h1>-->
   <div id="mensagemStatus">Carregando...</div>
-
+  
   <div class="grid-cartoes">
     <div class="cartao cor-cinza"><strong>📅 Ligações hoje</strong><div id="statusHoje">-</div></div>
     <div class="cartao cor-cinza"><strong>📆 Ligações na semana</strong><div id="statusSemana">-</div></div>
@@ -180,12 +181,12 @@
         const ligacoesSemana = dados.top_ligacoes_semana.map(i => i[1]);
 
         const cores = [
-          'rgba(75, 192, 192, 0.9)',
-          'rgba(255, 99, 132, 0.9)',
-          'rgba(255, 206, 86, 0.9)',
-          'rgba(54, 162, 235, 0.9)',
-          'rgba(153, 102, 255, 0.9)'
-        ];
+          'rgba(173, 216, 230, 0.9)', // azul claro
+          'rgba(75, 192, 75, 0.9)',   // verde
+          'rgba(255, 206, 86, 0.9)',  // amarelo
+          'rgba(0, 123, 255, 0.9)',   // azul escuro
+          'rgba(153, 102, 255, 0.9)'  // roxo
+        ];  
 
         const datalabelsConfig = {
           anchor: 'end',
