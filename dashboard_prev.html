@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard 3C Plus – Período Anterior</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+  <style>
+    *{box-sizing:border-box;}
+    html,body{margin:0;padding:0;height:100vh;font-family:Arial,sans-serif;background:#f8f9fa;}
+    body{display:flex;flex-direction:column;padding:0 20px;}
+    #mensagemStatus{font-weight:bold;font-size:22px;margin-bottom:20px;}
+
+    .grid-cartoes{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;flex:1;margin-bottom:10px;}
+    .cartao{background:#fff;padding:12px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.1);height:90px;display:flex;flex-direction:column;justify-content:center;font-size:22px;}
+    .cartao-largo{grid-column:span 2;}
+    .cartao strong{font-size:25px;}
+    .cartao div{font-size:23px;font-weight:bold;margin-top:4px;}
+
+    .grafico-container{background:#fff;padding:20px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.1);display:flex;flex-direction:column;overflow:hidden;}
+    .grafico-container h2{font-size:30px;margin-bottom:10px;}
+    canvas{flex:1;width:100%!important;height:100%!important;}
+
+    .cor-verde{background:#d1e7dd;} .cor-azul{background:#cff4fc;}
+    .cor-laranja{background:#fce5cd;} .cor-rosa{background:#f8d7da;}
+    .cor-cinza{background:#e2e3e5;}
+
+    #btnPrincipal{
+      position:fixed;top:15px;right:25px;background:#0d6efd;color:#fff;
+      padding:10px 18px;border-radius:8px;font-weight:bold;text-decoration:none;
+      box-shadow:0 2px 6px rgba(0,0,0,.25);
+    }
+    #btnPrincipal:hover{background:#084298;}
+  </style>
+</head>
+<body>
+  <a href="/" id="btnPrincipal">← Voltar ao atual</a>
+
+  <div id="mensagemStatus">Carregando…</div>
+
+  <div class="grid-cartoes">
+    <div class="cartao cor-cinza"><strong>📅 Ligações ontem</strong><div id="statusHoje">-</div></div>
+    <div class="cartao cor-cinza"><strong>📆 Ligações semana passada</strong><div id="statusSemana">-</div></div>
+    <div class="cartao cor-cinza"><strong>📞 Agente top ontem</strong><div id="statusAgenteTop">-</div></div>
+    <div class="cartao cor-cinza"><strong>📈 Total ligações mês passado</strong><div id="statusTotal">-</div></div>
+    <div class="cartao cor-verde"><strong>📞 Vendas semana passada</strong><div id="vendasSemana">-</div></div>
+    <div class="cartao cor-azul"><strong>📞 Total vendas mês passado</strong><div id="vendasTotal">-</div></div>
+    <div class="cartao cor-laranja"><strong>👑 Venda semana passada (agente)</strong><div id="agenteVendasSemana">-</div></div>
+    <div class="cartao cor-rosa"><strong>👑 Vendas mês passado (agente)</strong><div id="agenteVendasTotal">-</div></div>
+    <div class="cartao cor-cinza cartao-largo"><strong>🗣️ Agente top mês passado (tempo)</strong><div id="agenteTempoMes">-</div></div>
+    <div class="cartao cor-cinza cartao-largo"><strong>🗣️ Agente top semana passada (tempo)</strong><div id="agenteTempoSemana">-</div></div>
+  </div>
+
+  <div style="display:flex;gap:20px;height:75vh;margin-top:10px;">
+    <div class="grafico-container" style="flex:1;">
+      <h2>Top 5 – Vendas mês passado</h2>
+      <canvas id="graficoAgentes"></canvas>
+    </div>
+    <div class="grafico-container" style="flex:1;">
+      <h2>Top 5 – Ligações semana passada</h2>
+      <canvas id="graficoSemana"></canvas>
+    </div>
+  </div>
+
+  <script>
+    let chartAgentes=null, chartSemana=null;
+
+    /* ---------------- utilidades ---------------- */
+    const esperar = ms => new Promise(r=>setTimeout(r,ms));
+
+    async function pegarDados(){
+      const msg=document.getElementById("mensagemStatus");
+      msg.style.color="black"; msg.textContent="⏳ Buscando dados da API…";
+      try{
+        const r=await fetch("/api/pegar"); const j=await r.json();
+        msg.style.color=j.status==="ok"?"green":"red";
+        msg.textContent=j.status==="ok"?"Dados prontos.":"Erro: "+(j.erro||"desconhecido");
+      }catch(e){
+        msg.style.color="red"; msg.textContent="❌ Erro na requisição."; console.error(e);
+      }
+    }
+
+    /* -------------- cartões ---------------- */
+    async function carregarResumo(){
+      const r=await fetch("/api/resumo?prev"); const d=await r.json();
+      document.getElementById("statusHoje").textContent         = d.contagem_hoje        ?? '-';
+      document.getElementById("statusSemana").textContent       = d.contagem_semana      ?? '-';
+      document.getElementById("statusAgenteTop").textContent    = `${d.agente_top_hoje} (${d.ligacoes_top_hoje})`;
+      document.getElementById("statusTotal").textContent        = d.contagem_total       ?? '-';
+      document.getElementById("vendasSemana").textContent       = d.qualificacao_semana  ?? '-';
+      document.getElementById("vendasTotal").textContent        = d.qualificacao_total   ?? '-';
+      document.getElementById("agenteVendasSemana").textContent = `${d.agente_venda_semana} (${d.vendas_semana_agente})`;
+      document.getElementById("agenteVendasTotal").textContent  = `${d.agente_venda_total} (${d.vendas_total_agente})`;
+      document.getElementById("agenteTempoMes").textContent     = `${d.agente_tempo_mes} (${d.tempo_ttl_mes})`;
+      document.getElementById("agenteTempoSemana").textContent  = `${d.agente_tempo_semana} (${d.tempo_ttl_semana})`;
+    }
+
+    /* -------------- gráficos ---------------- */
+    async function carregarGraficos(){
+      if(chartAgentes)chartAgentes.destroy(); if(chartSemana)chartSemana.destroy();
+      const r=await fetch("/api/graficos?prev"); const d=await r.json();
+
+      const nomesV=d.top_vendas.map(x=>x[0].split(" ")[0]); const vendas=d.top_vendas.map(x=>x[1]);
+      const nomesS=d.top_ligacoes_semana.map(x=>x[0].split(" ")[0]); const lig=d.top_ligacoes_semana.map(x=>x[1]);
+      const cores=['rgba(173,216,230,.9)','rgba(75,192,75,.9)','rgba(255,206,86,.9)','rgba(0,123,255,.9)','rgba(153,102,255,.9)'];
+
+      const opts={responsive:true,maintainAspectRatio:false,layout:{padding:{top:30,bottom:50}},
+        plugins:{legend:{display:false},datalabels:{anchor:'end',align:'end',backgroundColor:'#fff9c4',
+          borderRadius:6,borderWidth:1,borderColor:'#ccc',padding:{top:6,bottom:6,left:10,right:10},
+          color:'#000',font:{weight:'bold',size:18},formatter:v=>v}},
+        scales:{x:{ticks:{font:{size:20},maxRotation:10,minRotation:10,padding:10},grid:{display:false}},
+                y:{beginAtZero:true,ticks:{font:{size:16}},grid:{display:false}}}};
+
+      chartAgentes=new Chart(document.getElementById("graficoAgentes"),{
+        type:"bar",
+        data:{labels:nomesV,datasets:[{label:"Vendas",data:vendas,backgroundColor:cores.slice(0,vendas.length)}]},
+        options:opts,plugins:[ChartDataLabels]});
+
+      chartSemana=new Chart(document.getElementById("graficoSemana"),{
+        type:"bar",
+        data:{labels:nomesS,datasets:[{label:"Ligações",data:lig,backgroundColor:cores.slice(0,lig.length)}]},
+        options:opts,plugins:[ChartDataLabels]});
+    }
+
+    /* -------------- ciclo de atualização ---------------- */
+    async function atualizarTudo(){
+      await carregarResumo(); await carregarGraficos();
+    }
+
+    /* -------------- controle “só 1ª vez no dia” ---------------- */
+    async function iniciarAtualizacaoAnterior() {
+      const hojeStr = new Date().toISOString().slice(0,10);  // YYYY-MM-DD
+      const status  = document.getElementById("mensagemStatus");
+
+      // Se ainda não carregamos hoje, busca na API e salva a data localmente
+      if (localStorage.getItem("prevCacheDate") !== hojeStr) {
+        status.textContent = "⏳ Buscando dados (primeira vez no dia)…";
+        status.style.color = "black";
+        await pegarDados();
+
+        // Espera no máx. 30 s pelo back-end terminar
+        let tent=0;
+        while (tent < 30) {
+          if (status.textContent.includes("Dados prontos")) break;
+          await esperar(1000); tent++;
+        }
+        localStorage.setItem("prevCacheDate", hojeStr);
+      } else {
+        status.textContent = "🚀 Usando dados já cacheados.";
+        status.style.color = "black";
+      }
+
+      // Exibe cartões e gráficos
+      await atualizarTudo();
+      status.textContent = "✅ Dados exibidos.";
+      status.style.color = "green";
+
+      // A cada minuto apenas refresca do cache (sem nova chamada à API)
+      setInterval(atualizarTudo, 60000);
+    }
+
+    iniciarAtualizacaoAnterior();
+  </script>
+</body>
+</html>

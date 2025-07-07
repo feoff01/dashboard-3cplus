@@ -16,7 +16,6 @@
       height: 100vh;
       font-family: Arial, sans-serif;
       background: #f8f9fa;
-  
     }
 
     body {
@@ -24,7 +23,6 @@
       flex-direction: column;
       padding: 0 20px 0 20px;
     }
-    
 
     h1 {
       color: #111;
@@ -57,11 +55,15 @@
       justify-content: center;
       font-size: 22px;
     }
-    
+
+    .cartao-largo {
+      grid-column: span 2;
+    }
+
     .cartao strong {
       font-size: 25px;
     }
-    
+
     .cartao div {
       font-size: 23px;
       font-weight: bold;
@@ -69,7 +71,7 @@
     }
 
     .grafico-container {
-      background:#fff;
+      background: #fff;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
@@ -94,9 +96,30 @@
     .cor-laranja{ background: #fce5cd; }
     .cor-rosa   { background: #f8d7da; }
     .cor-cinza  { background: #e2e3e5; }
+
+    /* Botão para página de período anterior */
+    #btnAnterior {
+      position: fixed;
+      top: 15px;
+      right: 25px;
+      background: #0d6efd;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: bold;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,.25);
+    }
+
+    #btnAnterior:hover {
+      background: #084298;
+    }
   </style>
 </head>
 <body>
+  <!-- Botão para visualizar período anterior -->
+  <a href="/previous" id="btnAnterior">← Período anterior</a>
+
   <!--<h1>Dashboard de Ligações - 3C Plus</h1>-->
   <div id="mensagemStatus">Carregando...</div>
   
@@ -109,6 +132,8 @@
     <div class="cartao cor-azul"><strong>📞 Total de vendas no mês</strong><div id="vendasTotal">-</div></div>
     <div class="cartao cor-laranja"><strong>👑 Venda semana(agente)</strong><div id="agenteVendasSemana">-</div></div>
     <div class="cartao cor-rosa"><strong>👑 Vendas no mês(agente)</strong><div id="agenteVendasTotal">-</div></div>
+    <div class="cartao cor-cinza cartao-largo"><strong>🗣️ Agente top mês (tempo)</strong><div id="agenteTempoMes">-</div></div>
+    <div class="cartao cor-cinza cartao-largo"><strong>🗣️ Agente top semana (tempo)</strong><div id="agenteTempoSemana">-</div></div>
   </div>
 
   <div style="display: flex; gap: 20px; height: 75vh; margin-top: 10px;">
@@ -146,17 +171,25 @@
 
     async function carregarResumo() {
       try {
-        const resp = await fetch("/api/resumo");
+        const resp   = await fetch("/api/resumo");
         const resumo = await resp.json();
-        document.getElementById("statusHoje").textContent         = resumo.contagem_hoje ?? '-';
-        document.getElementById("statusSemana").textContent       = resumo.contagem_semana ?? '-';
+    
+        /* cartões que já existiam … */
+        document.getElementById("statusHoje").textContent         = resumo.contagem_hoje        ?? '-';
+        document.getElementById("statusSemana").textContent       = resumo.contagem_semana      ?? '-';
         document.getElementById("statusAgenteTop").textContent    = `${resumo.agente_top_hoje} (${resumo.ligacoes_top_hoje})`;
-        document.getElementById("statusTotal").textContent        = resumo.contagem_total ?? '-';
-        document.getElementById("vendasSemana").textContent       = resumo.qualificacao_semana ?? '-';
-        document.getElementById("vendasTotal").textContent        = resumo.qualificacao_total ?? '-';
+        document.getElementById("statusTotal").textContent        = resumo.contagem_total       ?? '-';
+        document.getElementById("vendasSemana").textContent       = resumo.qualificacao_semana  ?? '-';
+        document.getElementById("vendasTotal").textContent        = resumo.qualificacao_total   ?? '-';
         document.getElementById("agenteVendasSemana").textContent = `${resumo.agente_venda_semana} (${resumo.vendas_semana_agente})`;
         document.getElementById("agenteVendasTotal").textContent  = `${resumo.agente_venda_total} (${resumo.vendas_total_agente})`;
-
+    
+        /* 👇🏽 NOVO – tempos de fala */
+        document.getElementById("agenteTempoMes").textContent     =
+          `${resumo.agente_tempo_mes} (${resumo.tempo_ttl_mes})`;
+        document.getElementById("agenteTempoSemana").textContent  =
+          `${resumo.agente_tempo_semana} (${resumo.tempo_ttl_semana})`;
+    
         document.getElementById("mensagemStatus").textContent = "📊 Dados atualizados na tela.";
         document.getElementById("mensagemStatus").style.color = "green";
       } catch (e) {
@@ -165,6 +198,7 @@
         document.getElementById("mensagemStatus").style.color = "red";
       }
     }
+    
 
     async function carregarDados() {
       if (chartAgentes) chartAgentes.destroy();
