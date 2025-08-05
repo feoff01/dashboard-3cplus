@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, send_file, request
+xfrom flask import Flask, jsonify, send_file, request
 import requests, os
 from datetime import datetime, timedelta
 
@@ -67,7 +67,7 @@ def intervalos_anteriores():
 # --------------------------------------------------------------------------- #
 @app.route("/")
 def index():
-    return send_file(os.path.join(os.path.dirname(__file__), "dashboard.html"))
+    return send_file(os.path.join(os.path.dirname(__file__), "index.html"))
 
 
 @app.route("/previous")
